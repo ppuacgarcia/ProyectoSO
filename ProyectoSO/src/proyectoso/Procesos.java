@@ -21,22 +21,46 @@ public class Procesos extends javax.swing.JFrame {
         TextH.setText("");
         TextB.setText("");
         
-        //Limpiar lista al inicio de la ejecucion
-        DefaultListModel listmodel = new DefaultListModel();
-        PMemoryList.setModel(listmodel);
-        
         //Limpiar tablas e insertar columnas
+        createProcess();
         DefaultTableModel modelPL = new DefaultTableModel();
         modelPL.addColumn("ID");
         modelPL.addColumn("State");
         modelPL.addColumn("Init");
         modelPL.addColumn("End");
         ProcList.setModel(modelPL);
+        
+        //Limpiar lista al inicio de la ejecucion
+        DefaultListModel listmodel = new DefaultListModel();
+        PMemoryList.setModel(listmodel);
+    }
+    
+    public void createProcess(){
+        String[] Procesos = new String[15];
+        char array[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K' };
+        Process[] proc = new Process[10];
+        
+        for(int i = 0; i < 10; i++){
+            proc[i] = new Process(array[i]+"");
+        }
+        
         DefaultTableModel modelDT = new DefaultTableModel();
         modelDT.addColumn("P");
         modelDT.addColumn("TL");
         modelDT.addColumn("TC");
+        for(int i = 0; i < 10; i++){
+            String Name = proc[i].getName();
+            int TL = proc[i].getTL();
+            int TC = proc[i].getTC();
+            modelDT.addRow(new Object[]{Name, TL, TC});
+        }
+        
         DescripTable.setModel(modelDT);
+        
+        
+        
+        
+        
     }
     /**
      * Creates new form Procesos
@@ -45,6 +69,8 @@ public class Procesos extends javax.swing.JFrame {
         initComponents();
         clearElements();
     }
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
