@@ -5,16 +5,30 @@
  */
 package proyectoso;
 
+import java.util.Random;
 import javax.swing.DefaultListModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 /**
  *
- * @author USUARIO
+ * @author JAz
  */
 public class Procesos extends javax.swing.JFrame {
-
+    //variables generales
+    private String[] Procesos = new String[15];
+    private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"};
+    private Process[] proc = new Process[10];
+    
+    //metodo adicional para random
+    private int generateRand(){
+        Random random = new Random();
+        int numeroAleatorio = random.nextInt(15) + 1;
+        return numeroAleatorio;
+    }
+    
+    
+    //metodo de limpieza inicial
     public void clearElements(){
         TextPlanificador.setText("");
         TextPc.setText("");
@@ -35,33 +49,69 @@ public class Procesos extends javax.swing.JFrame {
         PMemoryList.setModel(listmodel);
     }
     
+    //asignacion de procesos, TL y TC
     public void createProcess(){
-        String[] Procesos = new String[15];
         char array[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K' };
-        Process[] proc = new Process[10];
-        
+        //Crear procesos
         for(int i = 0; i < 10; i++){
             proc[i] = new Process(array[i]+"");
         }
-        
+        //Modelo de Tabla
         DefaultTableModel modelDT = new DefaultTableModel();
         modelDT.addColumn("P");
         modelDT.addColumn("TL");
         modelDT.addColumn("TC");
+        //Ciclo de llenado de tabla
         for(int i = 0; i < 10; i++){
             String Name = proc[i].getName();
             int TL = proc[i].getTL();
             int TC = proc[i].getTC();
             modelDT.addRow(new Object[]{Name, TL, TC});
         }
-        
         DescripTable.setModel(modelDT);
-        
-        
-        
-        
-        
     }
+    
+    //llenado de lista de memoria principal
+    public void memory_fill(){
+        DefaultListModel listmodel = new DefaultListModel();
+        Process[] TLOrder = proc;
+        for (int i = 0; i < 10 - 1; i++) {
+            for (int j = 0; j < 10 - i - 1; j++) {
+                if (TLOrder[j].getTL() > TLOrder[j + 1].getTL()) {
+                    Process temp = TLOrder[j];
+                    TLOrder[j] = TLOrder[j + 1];
+                    TLOrder[j + 1] = temp;
+                }
+            }
+        }
+        //Verificacion de ordenamiento de tiempo de llegada de los procesos
+        for (int i = 0; i < 10; i++) {
+            System.out.println(TLOrder[i].getTL());
+        }
+        
+        //hay que modificar el ciclo
+        //falta controlar errores para la memoria
+        //Escritura en la lista de memoria
+        for (int i = 0; i < 1; i++) {
+            int rnd = generateRand();
+            for (int j = 0; j < TLOrder[i].getTC(); j++) {
+                Mem_array[j] = TLOrder[i].getName();
+            
+            }
+        }
+        
+        
+        
+        
+        
+        for(int i = 0; i < 16; i++){
+            listmodel.addElement(Mem_array[i]);
+        }
+        PMemoryList.setModel(listmodel);
+    }
+    
+    
+    
     /**
      * Creates new form Procesos
      */
@@ -369,6 +419,7 @@ public class Procesos extends javax.swing.JFrame {
 
     private void BtnInitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnInitActionPerformed
         // TODO add your handling code here:
+        memory_fill();
     }//GEN-LAST:event_BtnInitActionPerformed
 
     /**
