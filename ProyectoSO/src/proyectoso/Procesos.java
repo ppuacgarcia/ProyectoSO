@@ -73,6 +73,7 @@ public class Procesos extends javax.swing.JFrame {
     
     //llenado de lista de memoria principal
     public void memory_fill(){
+        boolean bandera = false;
         DefaultListModel listmodel = new DefaultListModel();
         Process[] TLOrder = proc;
         for (int i = 0; i < 10 - 1; i++) {
@@ -89,20 +90,21 @@ public class Procesos extends javax.swing.JFrame {
             System.out.println(TLOrder[i].getTL());
         }
         
-        //hay que modificar el ciclo
-        //falta controlar errores para la memoria
+        //hay que modificar el ciclo para la cantidad de procesos (Ciclo For i)
+        //falta controlar errores para la memoria (Espacio y sobre escritura)
         //Escritura en la lista de memoria
-        for (int i = 0; i < 1; i++) {
-            int rnd = generateRand();
-            for (int j = 0; j < TLOrder[i].getTC(); j++) {
-                Mem_array[j] = TLOrder[i].getName();
-            
-            }
+        for (int i = 0; i < 2; i++) {
+            System.out.println("Proceso " + TLOrder[i].getName());
+            do{
+                int rnd = generateRand();
+                if(rnd + TLOrder[i].getTC() - 1 < 15){
+                    bandera = true;
+                    for (int j = 0; j < TLOrder[i].getTC(); j++) {
+                        Mem_array[j + TLOrder[i].getTC() - 1] = TLOrder[i].getName();
+                    }
+                }
+            }while(bandera == false);
         }
-        
-        
-        
-        
         
         for(int i = 0; i < 16; i++){
             listmodel.addElement(Mem_array[i]);
