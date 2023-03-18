@@ -15,9 +15,12 @@ import javax.swing.table.TableColumn;
  * @author JAz
  */
 public class Procesos extends javax.swing.JFrame {
+    //Procesos de referencia en consola para verificar el funcionamiento del programa
+
+
     //variables generales
     private String[] Procesos = new String[15];
-    private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"};
+    private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"}; // variable que se usa para representar la matriz
     private Process[] proc = new Process[10];
     
     //metodo adicional para random
@@ -71,17 +74,13 @@ public class Procesos extends javax.swing.JFrame {
         DescripTable.setModel(modelDT);
     }
     
+    //metodo para verificar si la posicion de la memoria esta disponible o no
     public boolean verifypos(int position, int process_len){
         boolean bandera =  false;
         for(int i = position; i < position+process_len; i++){
             if(Mem_array[i] != " "){
                 bandera = true;
             }
-        }
-        if(bandera == false){
-            //enviar señal de que el espacio en la memoria esta disponible
-        }else{
-            //enviar selañ de que el eespacio en la memoria no esta disponible
         }
         return bandera;
     }
@@ -90,6 +89,7 @@ public class Procesos extends javax.swing.JFrame {
         boolean bandera = false;
         DefaultListModel listmodel = new DefaultListModel();
         Process[] TLOrder = proc;
+        //Ordenamiento Burbuja para tiempos de llegada
         for (int i = 0; i < 10 - 1; i++) {
             for (int j = 0; j < 10 - i - 1; j++) {
                 if (TLOrder[j].getTL() > TLOrder[j + 1].getTL()) {
@@ -100,24 +100,27 @@ public class Procesos extends javax.swing.JFrame {
             }
         }
         //Verificacion de ordenamiento de tiempo de llegada de los procesos
+        //Solo sirve para verificar la lsita de tiempos de llegada este en orden
         for (int i = 0; i < 10; i++) {
             System.out.println(TLOrder[i].getTL());
         }
         
-        //hay que modificar el ciclo para la cantidad de procesos (Ciclo For i)
-        //falta controlar errores para la memoria (Espacio y sobre escritura)
         //Escritura en la lista de memoria
         for (int i = 0; i < 10; i++) {
             System.out.println("Proceso " + TLOrder[i].getName());
+            //Variables booleanas solo para verificacion de condiciones
             boolean spacemem = true;
             boolean aux = true;
+            //Ciclo para ingresar los procesos en la memoria
             for(int k = 0; k < 10; k++){
+                //generar numero random para ponerlo en la memoria
                 int rnd = generateRand();
                 System.out.println(rnd);
                 System.out.println(rnd+ " " + TLOrder[i].getTC());
                 if(rnd + TLOrder[i].getTC() - 1 < 14){
                     if(verifypos(rnd-1, TLOrder[i].getTC()) == false){
                         aux = false;
+                        //insercion de los procesos en el vector para luego ponerlos en la lista de memoria
                         for (int j = 0; j < TLOrder[i].getTC(); j++) {
                             System.out.println("");
                             System.out.println(j + TLOrder[i].getTC() - 1);
@@ -129,10 +132,12 @@ public class Procesos extends javax.swing.JFrame {
                 if(k == 9) spacemem = false;
             }
             if(spacemem == false){
+                //Espacio insuficiente para el proceso en la meoria o tiempo agotado para encontrar espacio
                 System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
             }
         }
         
+        //insercion de los procesos a la lista de la memoria
         for(int i = 0; i < 16; i++){
             listmodel.addElement(Mem_array[i]);
         }
