@@ -5,39 +5,147 @@
  */
 package proyectoso;
 
+import java.util.Random;
 import javax.swing.DefaultListModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
 /**
  *
- * @author USUARIO
+ * @author JAz
  */
 public class Procesos extends javax.swing.JFrame {
+    //Procesos de referencia en consola para verificar el funcionamiento del programa
 
+
+    //variables generales
+    private String[] Procesos = new String[15];
+    private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"}; // variable que se usa para representar la matriz
+    private Process[] proc = new Process[10];
+    
+    //metodo adicional para random
+    private int generateRand(){
+        Random random = new Random();
+        int numeroAleatorio = random.nextInt(12) + 1;
+        return numeroAleatorio;
+    }
+    
+    
+    //metodo de limpieza inicial
     public void clearElements(){
         TextPlanificador.setText("");
         TextPc.setText("");
         TextH.setText("");
         TextB.setText("");
         
-        //Limpiar lista al inicio de la ejecucion
-        DefaultListModel listmodel = new DefaultListModel();
-        PMemoryList.setModel(listmodel);
-        
         //Limpiar tablas e insertar columnas
+        createProcess();
         DefaultTableModel modelPL = new DefaultTableModel();
         modelPL.addColumn("ID");
         modelPL.addColumn("State");
         modelPL.addColumn("Init");
         modelPL.addColumn("End");
         ProcList.setModel(modelPL);
+        
+        //Limpiar lista al inicio de la ejecucion
+        DefaultListModel listmodel = new DefaultListModel();
+        PMemoryList.setModel(listmodel);
+    }
+    
+    //asignacion de procesos, TL y TC
+    public void createProcess(){
+        char array[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K' };
+        //Crear procesos
+        for(int i = 0; i < 10; i++){
+            proc[i] = new Process(array[i]+"");
+        }
+        //Modelo de Tabla
         DefaultTableModel modelDT = new DefaultTableModel();
         modelDT.addColumn("P");
         modelDT.addColumn("TL");
         modelDT.addColumn("TC");
+        //Ciclo de llenado de tabla
+        for(int i = 0; i < 10; i++){
+            String Name = proc[i].getName();
+            int TL = proc[i].getTL();
+            int TC = proc[i].getTC();
+            modelDT.addRow(new Object[]{Name, TL, TC});
+        }
         DescripTable.setModel(modelDT);
     }
+    
+    //metodo para verificar si la posicion de la memoria esta disponible o no
+    public boolean verifypos(int position, int process_len){
+        boolean bandera =  false;
+        for(int i = position; i < position+process_len; i++){
+            if(Mem_array[i] != " "){
+                bandera = true;
+            }
+        }
+        return bandera;
+    }
+    //llenado de lista de memoria principal
+    public void memory_fill(){
+        boolean bandera = false;
+        DefaultListModel listmodel = new DefaultListModel();
+        Process[] TLOrder = proc;
+        //Ordenamiento Burbuja para tiempos de llegada
+        for (int i = 0; i < 10 - 1; i++) {
+            for (int j = 0; j < 10 - i - 1; j++) {
+                if (TLOrder[j].getTL() > TLOrder[j + 1].getTL()) {
+                    Process temp = TLOrder[j];
+                    TLOrder[j] = TLOrder[j + 1];
+                    TLOrder[j + 1] = temp;
+                }
+            }
+        }
+        //Verificacion de ordenamiento de tiempo de llegada de los procesos
+        //Solo sirve para verificar la lsita de tiempos de llegada este en orden
+        for (int i = 0; i < 10; i++) {
+            System.out.println(TLOrder[i].getTL());
+        }
+        
+        //Escritura en la lista de memoria
+        for (int i = 0; i < 10; i++) {
+            System.out.println("Proceso " + TLOrder[i].getName());
+            //Variables booleanas solo para verificacion de condiciones
+            boolean spacemem = true;
+            boolean aux = true;
+            //Ciclo para ingresar los procesos en la memoria
+            for(int k = 0; k < 10; k++){
+                //generar numero random para ponerlo en la memoria
+                int rnd = generateRand();
+                System.out.println(rnd);
+                System.out.println(rnd+ " " + TLOrder[i].getTC());
+                if(rnd + TLOrder[i].getTC() - 1 < 14){
+                    if(verifypos(rnd-1, TLOrder[i].getTC()) == false){
+                        aux = false;
+                        //insercion de los procesos en el vector para luego ponerlos en la lista de memoria
+                        for (int j = 0; j < TLOrder[i].getTC(); j++) {
+                            System.out.println("");
+                            System.out.println(j + TLOrder[i].getTC() - 1);
+                            Mem_array[rnd-1+j] = TLOrder[i].getName();
+                        }
+                        break;
+                    }  
+                }
+                if(k == 9) spacemem = false;
+            }
+            if(spacemem == false){
+                //Espacio insuficiente para el proceso en la meoria o tiempo agotado para encontrar espacio
+                System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
+            }
+        }
+        
+        //insercion de los procesos a la lista de la memoria
+        for(int i = 0; i < 16; i++){
+            listmodel.addElement(Mem_array[i]);
+        }
+        PMemoryList.setModel(listmodel);
+    }
+    
+    
+    
     /**
      * Creates new form Procesos
      */
@@ -45,6 +153,8 @@ public class Procesos extends javax.swing.JFrame {
         initComponents();
         clearElements();
     }
+    
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -343,6 +453,7 @@ public class Procesos extends javax.swing.JFrame {
 
     private void BtnInitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnInitActionPerformed
         // TODO add your handling code here:
+        memory_fill();
     }//GEN-LAST:event_BtnInitActionPerformed
 
     /**
