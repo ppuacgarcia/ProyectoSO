@@ -23,7 +23,7 @@ public class Procesos extends javax.swing.JFrame {
     //metodo adicional para random
     private int generateRand(){
         Random random = new Random();
-        int numeroAleatorio = random.nextInt(15) + 1;
+        int numeroAleatorio = random.nextInt(12) + 1;
         return numeroAleatorio;
     }
     
@@ -71,6 +71,20 @@ public class Procesos extends javax.swing.JFrame {
         DescripTable.setModel(modelDT);
     }
     
+    public boolean verifypos(int position, int process_len){
+        boolean bandera =  false;
+        for(int i = position; i < position+process_len; i++){
+            if(Mem_array[i] != " "){
+                bandera = true;
+            }
+        }
+        if(bandera == false){
+            //enviar señal de que el espacio en la memoria esta disponible
+        }else{
+            //enviar selañ de que el eespacio en la memoria no esta disponible
+        }
+        return bandera;
+    }
     //llenado de lista de memoria principal
     public void memory_fill(){
         boolean bandera = false;
@@ -93,17 +107,30 @@ public class Procesos extends javax.swing.JFrame {
         //hay que modificar el ciclo para la cantidad de procesos (Ciclo For i)
         //falta controlar errores para la memoria (Espacio y sobre escritura)
         //Escritura en la lista de memoria
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 10; i++) {
             System.out.println("Proceso " + TLOrder[i].getName());
-            do{
+            boolean spacemem = true;
+            boolean aux = true;
+            for(int k = 0; k < 10; k++){
                 int rnd = generateRand();
-                if(rnd + TLOrder[i].getTC() - 1 < 15){
-                    bandera = true;
-                    for (int j = 0; j < TLOrder[i].getTC(); j++) {
-                        Mem_array[j + TLOrder[i].getTC() - 1] = TLOrder[i].getName();
-                    }
+                System.out.println(rnd);
+                System.out.println(rnd+ " " + TLOrder[i].getTC());
+                if(rnd + TLOrder[i].getTC() - 1 < 14){
+                    if(verifypos(rnd-1, TLOrder[i].getTC()) == false){
+                        aux = false;
+                        for (int j = 0; j < TLOrder[i].getTC(); j++) {
+                            System.out.println("");
+                            System.out.println(j + TLOrder[i].getTC() - 1);
+                            Mem_array[rnd-1+j] = TLOrder[i].getName();
+                        }
+                        break;
+                    }  
                 }
-            }while(bandera == false);
+                if(k == 9) spacemem = false;
+            }
+            if(spacemem == false){
+                System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
+            }
         }
         
         for(int i = 0; i < 16; i++){
