@@ -87,11 +87,27 @@ public class Procesos extends javax.swing.JFrame {
         }
         return bandera;
     }
+    public void processVerify(){
+        DefaultTableModel modelDT2 = new DefaultTableModel();
+        modelDT2=(DefaultTableModel) DescripTable.getModel();
+        int TL=0;
+        int TC=0;
+        for(int i=0;i<10;i++){
+          
+           TL=Integer.parseInt(modelDT2.getValueAt(i, 1).toString());
+           TC=Integer.parseInt(modelDT2.getValueAt(i, 2).toString());
+           this.proc[i].setTL(TL);
+           this.proc[i].setTC(TC);
+        }
+        
+        
+    }
     //llenado de lista de memoria principal
     public void memory_fill(){
+        processVerify();
         boolean bandera = false;
         DefaultListModel listmodel = new DefaultListModel();
-        Process[] TLOrder = proc;
+        Process[] TLOrder = this.proc;
         //Ordenamiento Burbuja para tiempos de llegada
         for (int i = 0; i < 10 - 1; i++) {
             for (int j = 0; j < 10 - i - 1; j++) {
@@ -102,15 +118,9 @@ public class Procesos extends javax.swing.JFrame {
                 }
             }
         }
-        //Verificacion de ordenamiento de tiempo de llegada de los procesos
-        //Solo sirve para verificar la lsita de tiempos de llegada este en orden
-        for (int i = 0; i < 10; i++) {
-            System.out.println(TLOrder[i].getTL());
-        }
-        
         //Escritura en la lista de memoria
         for (int i = 0; i < 10; i++) {
-            System.out.println("Proceso " + TLOrder[i].getName());
+           // System.out.println("Proceso " + TLOrder[i].getName());
             //Variables booleanas solo para verificacion de condiciones
             boolean spacemem = true;
             boolean aux = true;
@@ -118,15 +128,12 @@ public class Procesos extends javax.swing.JFrame {
             for(int k = 0; k < 10; k++){
                 //generar numero random para ponerlo en la memoria
                 int rnd = generateRand();
-                System.out.println(rnd);
-                System.out.println(rnd+ " " + TLOrder[i].getTC());
+               
                 if(rnd + TLOrder[i].getTC() - 1 < 14){
                     if(verifypos(rnd-1, TLOrder[i].getTC()) == false){
                         aux = false;
                         //insercion de los procesos en el vector para luego ponerlos en la lista de memoria
                         for (int j = 0; j < TLOrder[i].getTC(); j++) {
-                            System.out.println("");
-                            System.out.println(j + TLOrder[i].getTC() - 1);
                             Mem_array[rnd-1+j] = TLOrder[i].getName();
                         }
                         break;
@@ -135,8 +142,7 @@ public class Procesos extends javax.swing.JFrame {
                 if(k == 9) spacemem = false;
             }
             if(spacemem == false){
-                //Espacio insuficiente para el proceso en la meoria o tiempo agotado para encontrar espacio
-                System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
+                    System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
             }
         }
         
@@ -197,7 +203,6 @@ public class Procesos extends javax.swing.JFrame {
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
 
-        jLabel3.setForeground(new java.awt.Color(0, 0, 0));
         jLabel3.setText("Memoria Principal");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -261,13 +266,11 @@ public class Procesos extends javax.swing.JFrame {
         jPanel3.setBackground(new java.awt.Color(153, 153, 153));
         jPanel3.setForeground(new java.awt.Color(153, 153, 153));
 
-        jLabel8.setForeground(new java.awt.Color(0, 0, 0));
         jLabel8.setText("Planificador");
 
         TextPlanificador.setEditable(false);
         TextPlanificador.setText("jTextField1");
 
-        jLabel11.setForeground(new java.awt.Color(0, 0, 0));
         jLabel11.setText("Contador de programa");
 
         ProcList.setModel(new javax.swing.table.DefaultTableModel(
@@ -292,10 +295,8 @@ public class Procesos extends javax.swing.JFrame {
         TextH.setEditable(false);
         TextH.setText("jTextField2");
 
-        jLabel12.setForeground(new java.awt.Color(0, 0, 0));
         jLabel12.setText("b");
 
-        jLabel13.setForeground(new java.awt.Color(0, 0, 0));
         jLabel13.setText("h");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -350,33 +351,25 @@ public class Procesos extends javax.swing.JFrame {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(TextH, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel13))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 30, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(23, 23, 23))
         );
 
-        jLabel1.setForeground(new java.awt.Color(0, 0, 0));
         jLabel1.setText("CPU");
 
-        jLabel2.setForeground(new java.awt.Color(0, 0, 0));
         jLabel2.setText("Memoria Principal");
 
-        jLabel4.setForeground(new java.awt.Color(0, 0, 0));
         jLabel4.setText("0x00h");
 
-        jLabel5.setForeground(new java.awt.Color(0, 0, 0));
         jLabel5.setText("0x00h");
 
-        jLabel6.setForeground(new java.awt.Color(0, 0, 0));
         jLabel6.setText("Hora del Sistema");
 
-        jLabel7.setForeground(new java.awt.Color(0, 0, 0));
         jLabel7.setText("00:00:00 hrs");
 
-        jLabel9.setForeground(new java.awt.Color(0, 0, 0));
         jLabel9.setText("b");
 
-        jLabel10.setForeground(new java.awt.Color(0, 0, 0));
         jLabel10.setText("h");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -420,16 +413,15 @@ public class Procesos extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jScrollPane2)
-                        .addGroup(jPanel2Layout.createSequentialGroup()
-                            .addComponent(jLabel5)
-                            .addGap(136, 136, 136)
-                            .addComponent(jLabel10)
-                            .addGap(18, 18, 18)
-                            .addComponent(jLabel9)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 118, Short.MAX_VALUE)
-                            .addComponent(jLabel4))))
+                    .addComponent(jScrollPane2)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel5)
+                        .addGap(136, 136, 136)
+                        .addComponent(jLabel10)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel9)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 118, Short.MAX_VALUE)
+                        .addComponent(jLabel4)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
