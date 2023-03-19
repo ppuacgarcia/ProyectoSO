@@ -15,6 +15,7 @@ public class Process {
     private String name;
     private int TL;
     private int TC;
+    private boolean mem;
 
     private int generateRand(){
         Random random = new Random();
@@ -26,6 +27,7 @@ public class Process {
         this.name = name;
         this.TC = generateRand();
         this.TL = generateRand();
+        this.mem=false;
     }
     
     public Process() {
@@ -41,7 +43,13 @@ public class Process {
     public void setName(String name) {
         this.name = name;
     }
+    public Boolean getMem() {
+        return mem;
+    }
 
+    public void setMem(Boolean mem) {
+        this.mem = mem;
+    }
     public int getTL() {
         return TL;
     }

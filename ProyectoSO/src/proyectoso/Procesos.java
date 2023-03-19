@@ -19,13 +19,14 @@ import javax.swing.table.TableColumn;
  */
 public class Procesos extends javax.swing.JFrame {
     //Procesos de referencia en consola para verificar el funcionamiento del programa
-    Reloj HoraActual=new Reloj();
+    
 
     //variables generales
     private String[] Procesos = new String[15];
     private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"}; // variable que se usa para representar la matriz
     private Process[] proc = new Process[10];
-    
+    private Reloj HoraActual=new Reloj();
+    private int mC=0; 
     //metodo adicional para random
     private int generateRand(){
         Random random = new Random();
@@ -61,6 +62,7 @@ public class Procesos extends javax.swing.JFrame {
         //Crear procesos
         for(int i = 0; i < 10; i++){
             proc[i] = new Process(array[i]+"");
+            
         }
         //Modelo de Tabla
         DefaultTableModel modelDT = new DefaultTableModel();
@@ -99,8 +101,19 @@ public class Procesos extends javax.swing.JFrame {
            this.proc[i].setTL(TL);
            this.proc[i].setTC(TC);
         }
-        
-        
+    }
+    public void ListFill(){
+        DefaultTableModel modelT = new DefaultTableModel();
+        modelT.addColumn("ID");
+        modelT.addColumn("ESTADO");
+        modelT.addColumn("HORA INICIO");
+        modelT.addColumn("HORA FINALIZACION");
+        modelT.addRow(new Object[]{proc[0].getName(),"Ejecucion",this.jLabel7.getText(),""});
+        this.ProcList.setModel(modelT);
+        this.TextPlanificador.setText(proc[0].getName());
+        for (int i = 1; i < 10 ; i++) {
+                
+        }
     }
     //llenado de lista de memoria principal
     public void memory_fill(){
@@ -140,9 +153,14 @@ public class Procesos extends javax.swing.JFrame {
                     }  
                 }
                 if(k == 9) spacemem = false;
+               
+                
             }
             if(spacemem == false){
                     System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
+            }else {
+                this.mC++;
+                proc[i].setMem(true);
             }
         }
         
@@ -151,6 +169,10 @@ public class Procesos extends javax.swing.JFrame {
             listmodel.addElement(Mem_array[i]);
         }
         PMemoryList.setModel(listmodel);
+        for(int i = 0; i < 10; i++){
+            System.out.println(proc[i].getName()+" TL"+proc[i].getTL()+" TC"+proc[i].getTC()+" MEM"+proc[i].getMem());
+        }
+        ListFill();
     }
     
     
@@ -303,12 +325,8 @@ public class Procesos extends javax.swing.JFrame {
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(56, 56, 56)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 60, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(123, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(TextPlanificador, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -331,6 +349,7 @@ public class Procesos extends javax.swing.JFrame {
                                     .addComponent(TextH, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(TextB, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addGap(135, 135, 135))))
+            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
