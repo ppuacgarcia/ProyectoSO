@@ -5,7 +5,10 @@
  */
 package proyectoso;
 
+import java.util.Calendar;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -16,7 +19,7 @@ import javax.swing.table.TableColumn;
  */
 public class Procesos extends javax.swing.JFrame {
     //Procesos de referencia en consola para verificar el funcionamiento del programa
-
+    Reloj HoraActual=new Reloj();
 
     //variables generales
     private String[] Procesos = new String[15];
@@ -151,6 +154,7 @@ public class Procesos extends javax.swing.JFrame {
      */
     public Procesos() {
         initComponents();
+        HoraActual.start();
         clearElements();
     }
     
@@ -489,6 +493,36 @@ public class Procesos extends javax.swing.JFrame {
                 new Procesos().setVisible(true);
             }
         });
+    }
+    public class Reloj extends Thread {
+        Calendar calendario;
+        
+        @Override
+        public void run() {
+            while (true) {
+                String horaSistema = "";
+                calendario = Calendar.getInstance();
+                if (calendario.get(Calendar.HOUR_OF_DAY)<10)
+                    horaSistema += String.valueOf("0"+calendario.get(Calendar.HOUR_OF_DAY)) + ":";
+                else
+                    horaSistema += String.valueOf(calendario.get(Calendar.HOUR_OF_DAY)) + ":";
+                if (calendario.get(Calendar.MINUTE)<10)
+                    horaSistema += String.valueOf("0"+calendario.get(Calendar.MINUTE)) + ":";
+                else
+                    horaSistema += String.valueOf(calendario.get(Calendar.MINUTE)) + ":";
+                if (calendario.get(Calendar.SECOND)<10)
+                    horaSistema += String.valueOf("0"+calendario.get(Calendar.SECOND)) + ":";
+                else
+                    horaSistema += String.valueOf(calendario.get(Calendar.SECOND)) + ":";
+                horaSistema += String.valueOf(calendario.get(Calendar.MILLISECOND)) + " hrs";
+                jLabel7.setText(horaSistema);
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
