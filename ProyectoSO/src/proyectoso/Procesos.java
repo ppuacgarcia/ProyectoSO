@@ -17,15 +17,16 @@ import javax.swing.table.TableColumn;
  *
  * @author JAz
  */
-public class Procesos extends javax.swing.JFrame {
+public class Procesos extends javax.swing.JFrame{
     //Procesos de referencia en consola para verificar el funcionamiento del programa
     
 
     //variables generales
     private String[] Procesos = new String[15];
     private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"}; // variable que se usa para representar la matriz
-    private Process[] proc = new Process[10];
+    public Process[] proc = new Process[10];
     private Reloj HoraActual=new Reloj();
+    private RoundRobin CPU=new RoundRobin();
     private int mC=0; 
     //metodo adicional para random
     private int generateRand(){
@@ -155,10 +156,11 @@ public class Procesos extends javax.swing.JFrame {
                 
             }
             if(spacemem == false){
-                    System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
+                    //System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
             }else {
                 this.mC++;
                 proc[i].setMem(true);
+                proc[i].setEstado(0);
             }
         }
         
@@ -181,6 +183,7 @@ public class Procesos extends javax.swing.JFrame {
     public Procesos() {
         initComponents();
         HoraActual.start();
+        
         clearElements();
     }
     
@@ -467,6 +470,7 @@ public class Procesos extends javax.swing.JFrame {
     private void BtnInitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnInitActionPerformed
         // TODO add your handling code here:
         memory_fill();
+        this.CPU.start();
     }//GEN-LAST:event_BtnInitActionPerformed
 
     /**
@@ -502,6 +506,65 @@ public class Procesos extends javax.swing.JFrame {
                 new Procesos().setVisible(true);
             }
         });
+    }
+    public class RoundRobin extends Thread{
+        private String ex="";
+        private Process[] aux = new Process[10];
+        private int c=0;
+        private int auxc=0;
+        private int tres=0;
+        private int quantum=3;
+        @Override
+        public void run(){
+            while(true){
+               //aux=procesos que estan en memoria 
+               for(int i=0;i<10;i++){
+                   if(proc[i].getMem()){
+                        aux[c]=proc[i];
+                       c++;  
+                   }
+               }
+               
+               //modificar estados              
+               aux[auxc].setEstado(3);
+               for(int i=0;i<c;i++){
+                    if(aux[i]!=aux[auxc]){
+                        aux[i].setEstado(0);
+                    }
+               }
+               tres=aux[auxc].getTC()-aux[auxc].getTP()-this.quantum;
+               if(tres>0){
+                    try {
+                     Thread.sleep(3000);
+                    } catch (InterruptedException ex) {
+                     Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    aux[auxc].setTP(aux[auxc].getTP()+this.quantum);
+               }else if(aux[auxc].getTC()>aux[auxc].getTP()){
+                    int millis=(aux[auxc].getTC()-aux[auxc].getTP())*1000;
+                    System.out.println( millis);
+                    try {
+                     Thread.sleep(millis);
+                    } catch (InterruptedException ex) {
+                     Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    proc[auxc].setMem(false);
+                    aux[auxc].setTP(aux[auxc].getTP()+(millis/1000));
+                    c--;
+                    
+               }else{
+                   break;
+                }
+               System.out.println("NAME"+ aux[auxc].getName()+" TL"+ aux[auxc].getTL()+" TC"+ aux[auxc].getTC()+
+                       " MEM"+ aux[auxc].getMem()+" Tiempo procesado:"+aux[auxc].getTP());
+               if(auxc<c-1){
+                    auxc++;
+               }else if(auxc==c-1){
+                   auxc=0;
+               }              
+               c=0;
+            }
+        }
     }
     public class Reloj extends Thread {
         Calendar calendario;

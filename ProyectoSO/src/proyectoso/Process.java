@@ -13,10 +13,16 @@ import java.util.Random;
  */
 public class Process {
     private String name;
+    //TL TIEMPO LLEGADA
     private int TL;
+    //TC TIEMPO CONSUMO
     private int TC;
+    //TP TIEMPO PROCESADO
+    private int TP;
+    //bool para ver si esta en memoria
     private boolean mem;
-
+    // int listo=0 bloqueado=1 ejecucion=3
+    private int  estado;
     private int generateRand(){
         Random random = new Random();
         int numeroAleatorio = random.nextInt(10) + 1;
@@ -27,6 +33,7 @@ public class Process {
         this.name = name;
         this.TC = generateRand();
         this.TL = generateRand();
+        this.TP=0;
         this.mem=false;
     }
     
@@ -35,7 +42,20 @@ public class Process {
         this.TC = generateRand();
         this.TL = generateRand();
     }
-
+    public int getEstado(){
+        return this.estado;
+    }
+    
+    public void setEstado(int estado){
+        this.estado=estado;
+    }
+    public int getTP(){
+        return this.TP;
+    }
+    
+    public void setTP(int tp){
+        this.TP=tp;
+    }
     public String getName() {
         return name;
     }
