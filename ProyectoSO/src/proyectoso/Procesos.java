@@ -509,14 +509,16 @@ public class Procesos extends javax.swing.JFrame{
     }
     public class RoundRobin extends Thread{
         private String ex="";
-        private Process[] aux = new Process[10];
         private int c=0;
         private int auxc=0;
         private int tres=0;
         private int quantum=3;
+        private boolean memVoid=false;
         @Override
         public void run(){
+            
             while(true){
+                Process[] aux = new Process[10];
                //aux=procesos que estan en memoria 
                for(int i=0;i<10;i++){
                    if(proc[i].getMem()){
@@ -524,42 +526,53 @@ public class Procesos extends javax.swing.JFrame{
                        c++;  
                    }
                }
-               
-               //modificar estados              
-               aux[auxc].setEstado(3);
-               for(int i=0;i<c;i++){
-                    if(aux[i]!=aux[auxc]){
-                        aux[i].setEstado(0);
+               if(c==0){
+                   memVoid=true;
+               }
+               //modificar estados
+               if(memVoid==false){
+                    aux[auxc].setEstado(3);
+                    for(int i=0;i<c;i++){
+                        if(aux[i]!=aux[auxc]){
+                            aux[i].setEstado(0);
+                        }
+                   }
+                   tres=aux[auxc].getTC()-aux[auxc].getTP()-this.quantum;
+                    if(tres>0){
+                         try {
+                          Thread.sleep(3000);
+                         } catch (InterruptedException ex) {
+                          Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                         }
+                         aux[auxc].setTP(aux[auxc].getTP()+this.quantum);
+                    }else if(aux[auxc].getTC()>aux[auxc].getTP()){
+                         int millis=(aux[auxc].getTC()-aux[auxc].getTP())*1000;
+                         System.out.println( millis);
+                         try {
+                          Thread.sleep(millis);
+                         } catch (InterruptedException ex) {
+                                Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                         }
+                         aux[auxc].setTP(aux[auxc].getTP()+(millis/1000));
+                         c--;
                     }
                }
-               tres=aux[auxc].getTC()-aux[auxc].getTP()-this.quantum;
-               if(tres>0){
-                    try {
-                     Thread.sleep(3000);
-                    } catch (InterruptedException ex) {
-                     Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    aux[auxc].setTP(aux[auxc].getTP()+this.quantum);
-               }else if(aux[auxc].getTC()>aux[auxc].getTP()){
-                    int millis=(aux[auxc].getTC()-aux[auxc].getTP())*1000;
-                    System.out.println( millis);
-                    try {
-                     Thread.sleep(millis);
-                    } catch (InterruptedException ex) {
-                     Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    proc[auxc].setMem(false);
-                    aux[auxc].setTP(aux[auxc].getTP()+(millis/1000));
-                    c--;
-                    
-               }else{
+               
+               
+                if(memVoid){
                    break;
                 }
+               if(aux[auxc].getTP()==aux[auxc].getTC()){
+                   aux[auxc].setMem(false);
+                   proc[auxc].setMem(false);
+               }
                System.out.println("NAME"+ aux[auxc].getName()+" TL"+ aux[auxc].getTL()+" TC"+ aux[auxc].getTC()+
                        " MEM"+ aux[auxc].getMem()+" Tiempo procesado:"+aux[auxc].getTP());
-               if(auxc<c-1){
+               if(auxc<c){
                     auxc++;
-               }else if(auxc==c-1){
+               }
+               System.out.println("auxc "+auxc+" c"+c);
+               if(auxc==c){
                    auxc=0;
                }              
                c=0;
