@@ -523,6 +523,16 @@ public class Procesos extends javax.swing.JFrame{
         return timer;
     }
     
+    public void StatusTableFill(){
+        DefaultTableModel modelT = new DefaultTableModel();
+        modelT.addColumn("ID");
+        modelT.addColumn("ESTADO");
+        modelT.addColumn("HORA INICIO");
+        modelT.addColumn("HORA FINALIZACION");
+        modelT.addRow(new Object[]{proc[0].getName(),"Ejecucion",this.jLabel7.getText(),""});
+        this.ProcList.setModel(modelT);
+    }
+    
     public void DeleteProcessMemory(Process aux){
         DefaultListModel listmodel = new DefaultListModel();
         
