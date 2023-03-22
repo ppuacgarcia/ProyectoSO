@@ -5,6 +5,9 @@
  */
 package proyectoso;
 
+import java.awt.Point;
+import static java.awt.image.ImageObserver.HEIGHT;
+import static java.awt.image.ImageObserver.WIDTH;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.logging.Level;
@@ -22,7 +25,7 @@ public class Procesos extends javax.swing.JFrame{
     //variables generales
     private String[] Procesos = new String[15];
     private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"}; // variable que se usa para representar la matriz
-    private String Direc_array[] = {"0xAFFh","0xA48h","0x98Ch","0x8D0h","0x814h","0x758h","0x69Ch","0x5E0h","0x524h","0x468h","0x3ACh","0x2F0h","0x234h","0x178h","0x0BCh","0x000h"}; // variable que se usa para direcciones de memoria por segundo
+     // variable que se usa para direcciones de memoria por segundo
     private Process[] proc = new Process[10];
     private Reloj HoraActual=new Reloj();
     private int mC=0; 
@@ -204,12 +207,19 @@ public class Procesos extends javax.swing.JFrame{
         }
         PMemoryList.setModel(listmodel);
     }
+    public void position(int b, int h){
+            Point pt9=jLabel9.getLocation();
+            
+            jLabel9.setLocation(pt9.x, b);
+            jLabel10.setLocation(pt9.x, h);
+           
+    }
     public class RoundRobin extends Thread {
         private Calendar Tiempo;
         private int TP;
         private String Pactual;
         private int quantum;
-
+        private String Direc_array[] = {"0x104h","0x118h","0x104h","0xF0h","0xDCh","0xC8h","0xB4h","0xA0h","0x8Ch","0x78h","0x64h","0x50h","0x3Ch","0x28h","0x14h","0x000h"};
         public RoundRobin(Calendar Tiempo) {
             this.Tiempo = Tiempo;
             this.TP=0;
@@ -222,8 +232,6 @@ public class Procesos extends javax.swing.JFrame{
         public void setTiempo(Calendar Tiempo) {
             this.Tiempo = Tiempo;
         }
-        
-        
         @Override
         public void run(){
             int auxContP = 0;
@@ -234,6 +242,12 @@ public class Procesos extends javax.swing.JFrame{
             }
             TextPlanificador.setText(proc_enMem[auxContP].getName());
             proc_enMem[auxContP].setEstado("Ejecucion");
+            int bpos=66+((proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20);
+            int hpos=66+((proc_enMem[auxContP].getMemoryspace())*20);
+            
+            position(bpos,hpos);
+            TextB.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
+            TextH.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()]);
             ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
             proc_enMem[auxContP].setInicio(jLabel7.getText());
             ProcList.setValueAt(proc_enMem[auxContP].getInicio(), auxContP, 2);
@@ -275,6 +289,11 @@ public class Procesos extends javax.swing.JFrame{
                     TextPlanificador.setText(proc_enMem[auxContP].getName());
                     proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
                     proc_enMem[auxContP].setEstado("Ejecucion");
+                    bpos=66+(proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20;
+                    hpos=66+proc_enMem[auxContP].getMemoryspace()*20;
+                    position(bpos,hpos);
+                    TextB.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
+                    TextH.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()]);
                     ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                     quantum++;
                 }
@@ -299,6 +318,13 @@ public class Procesos extends javax.swing.JFrame{
                             TextPlanificador.setText(proc_enMem[auxContP].getName());
                             proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
                             proc_enMem[auxContP].setEstado("Ejecucion");
+                            bpos=66+(proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20;
+                            hpos=66+proc_enMem[auxContP].getMemoryspace()*20;
+                            position(bpos,hpos);
+                            jLabel9.setLocation(jLabel9.getHorizontalTextPosition(), bpos);
+                            jLabel10.setLocation(jLabel10.getHorizontalTextPosition(), hpos);
+                            TextB.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
+                            TextH.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()]);
                             ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                             quantum=1;
                             break;
@@ -538,7 +564,7 @@ public class Procesos extends javax.swing.JFrame{
 
         jLabel4.setText("0x00h");
 
-        jLabel5.setText("0x00h");
+        jLabel5.setText("0x104h");
 
         jLabel6.setText("Hora del Sistema");
 
@@ -627,10 +653,12 @@ public class Procesos extends javax.swing.JFrame{
 
     private void BtnInitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnInitActionPerformed
         // TODO add your handling code here:
+        
         TiempoActual = Calendar.getInstance();
         memory_fill();
         rr = new RoundRobin(TiempoActual);
         rr.start();
+       
     }//GEN-LAST:event_BtnInitActionPerformed
 
     /**
