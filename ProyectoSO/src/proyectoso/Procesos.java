@@ -173,6 +173,7 @@ public class Procesos extends javax.swing.JFrame{
             System.out.println(proc[i].getName()+" TL"+proc[i].getTL()+" TC"+proc[i].getTC()+" MEM"+proc[i].getMem());
         }
         ListFill();
+        proc = TLOrder;
     }
     
     
@@ -507,62 +508,80 @@ public class Procesos extends javax.swing.JFrame{
             }
         });
     }
+    
+    public int verifyTime(){
+        int timer = 0;
+        for(int i = 0; i < 10; i++){
+            if(proc[i].getMem() == true){
+                timer = timer + proc[i].getTC();
+                System.out.println(timer);
+            }
+        }
+        return timer;
+    }
+    
     public class RoundRobin extends Thread{
         private String ex="";
-        private Process[] aux = new Process[10];
+        private Process[] aux = proc;
         private int c=0;
         private int auxc=0;
         private int tres=0;
         private int quantum=3;
         @Override
         public void run(){
-            while(true){
-               //aux=procesos que estan en memoria 
-               for(int i=0;i<10;i++){
-                   if(proc[i].getMem()){
-                        aux[c]=proc[i];
-                       c++;  
-                   }
-               }
-               
-               //modificar estados              
-               aux[auxc].setEstado(3);
-               for(int i=0;i<c;i++){
-                    if(aux[i]!=aux[auxc]){
-                        aux[i].setEstado(0);
+            while(verifyTime() > 0){
+                for(int i = 0; i < 10; i++){
+                    if(aux[i].getMem() == true){
+                        //Quitar tiempo de consumo en los procesos
+                        if(aux[i].getTC() > 3){
+                            aux[i].setTC(aux[i].getTC() - 3);
+                            for(int j = 0; j < 10; j++){
+                                System.out.println(aux[j].getName()+" TL"+aux[j].getTL()+" TC"+aux[j].getTC()+" MEM"+aux[j].getMem());
+                            }
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }else if(aux[i].getTC() == 3){
+                            aux[i].setTC(aux[i].getTC() - 3);
+                            aux[i].setMem(false);
+                            for(int j = 0; j < 10; j++){
+                                System.out.println(aux[j].getName()+" TL"+aux[j].getTL()+" TC"+aux[j].getTC()+" MEM"+aux[j].getMem());
+                            }
+                            try {
+                                Thread.sleep(3000);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }else if(aux[i].getTC() == 2){
+                            aux[i].setTC(aux[i].getTC() - 2);
+                            aux[i].setMem(false);
+                            for(int j = 0; j < 10; j++){
+                                System.out.println(aux[j].getName()+" TL"+aux[j].getTL()+" TC"+aux[j].getTC()+" MEM"+aux[j].getMem());
+                            }
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }else if(aux[i].getTC() == 1){
+                            aux[i].setTC(aux[i].getTC() - 1);
+                            aux[i].setMem(false);
+                            for(int j = 0; j < 10; j++){
+                                System.out.println(aux[j].getName()+" TL"+aux[j].getTL()+" TC"+aux[j].getTC()+" MEM"+aux[j].getMem());
+                            }
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
                     }
-               }
-               tres=aux[auxc].getTC()-aux[auxc].getTP()-this.quantum;
-               if(tres>0){
-                    try {
-                     Thread.sleep(3000);
-                    } catch (InterruptedException ex) {
-                     Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    aux[auxc].setTP(aux[auxc].getTP()+this.quantum);
-               }else if(aux[auxc].getTC()>aux[auxc].getTP()){
-                    int millis=(aux[auxc].getTC()-aux[auxc].getTP())*1000;
-                    System.out.println( millis);
-                    try {
-                     Thread.sleep(millis);
-                    } catch (InterruptedException ex) {
-                     Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    proc[auxc].setMem(false);
-                    aux[auxc].setTP(aux[auxc].getTP()+(millis/1000));
-                    c--;
-                    
-               }else{
-                   break;
+                    System.out.println("");
+                    System.out.println("");
                 }
-               System.out.println("NAME"+ aux[auxc].getName()+" TL"+ aux[auxc].getTL()+" TC"+ aux[auxc].getTC()+
-                       " MEM"+ aux[auxc].getMem()+" Tiempo procesado:"+aux[auxc].getTP());
-               if(auxc<c-1){
-                    auxc++;
-               }else if(auxc==c-1){
-                   auxc=0;
-               }              
-               c=0;
+                
             }
         }
     }

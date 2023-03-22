@@ -42,6 +42,13 @@ public class Process {
         this.TC = generateRand();
         this.TL = generateRand();
     }
+    
+    public Process(String name, int TC, int TL){
+        this.name = name;
+        this.TC = TC;
+        this.TL = TL;
+    }
+    
     public int getEstado(){
         return this.estado;
     }
