@@ -1,30 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package proyectoso;
-
 import java.util.Random;
-
-/**
- *
- * @author USUARIO
- */
 public class Process {
     private String name;
-    //TL TIEMPO LLEGADA
     private int TL;
-    //TC TIEMPO CONSUMO
     private int TC;
-    //TP TIEMPO PROCESADO
     private int TP;
-    //bool para ver si esta en memoria
+    private String estado;
     private boolean mem;
-    // int listo=0 bloqueado=1 ejecucion=3
-    private int  estado;
+    private String inicio;
+    private String fin;
     private int memoryspace;
-    
+
     private int generateRand(){
         Random random = new Random();
         int numeroAleatorio = random.nextInt(10) + 1;
@@ -35,38 +21,19 @@ public class Process {
         this.name = name;
         this.TC = generateRand();
         this.TL = generateRand();
-        this.TP = this.TC;
+        this.TP = 0;
         this.mem=false;
+        this.estado = "-";
     }
     
     public Process() {
         this.name = name;
         this.TC = generateRand();
         this.TL = generateRand();
-        this.TP = this.TC;
+        this.TP = 0;
+        this.estado = "-";
     }
-    
-    public Process(String name, int TC, int TL){
-        this.name = name;
-        this.TC = TC;
-        this.TL = TL;
-        this.TP = this.TC;
-    }
-    
-    public int getEstado(){
-        return this.estado;
-    }
-    
-    public void setEstado(int estado){
-        this.estado=estado;
-    }
-    public int getTP(){
-        return this.TP;
-    }
-    
-    public void setTP(int tp){
-        this.TP=tp;
-    }
+
     public String getName() {
         return name;
     }
@@ -97,14 +64,51 @@ public class Process {
         this.TC = TC;
     }
 
+    public boolean isMem() {
+        return mem;
+    }
+
+    public void setMem(boolean mem) {
+        this.mem = mem;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public int getTP() {
+        return TP;
+    }
+
+    public void setTP(int TP) {
+        this.TP = TP;
+    }
+
+    public String getInicio() {
+        return inicio;
+    }
+
+    public String getFin() {
+        return fin;
+    }
+
+    public void setInicio(String inicio) {
+        this.inicio = inicio;
+    }
+
+    public void setFin(String fin) {
+        this.fin = fin;
+    }
+    
     public int getMemoryspace() {
         return memoryspace;
     }
-
     public void setMemoryspace(int memoryspace) {
         this.memoryspace = memoryspace;
     }
-    
-    
     
 }
