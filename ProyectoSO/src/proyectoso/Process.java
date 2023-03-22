@@ -13,16 +13,14 @@ import java.util.Random;
  */
 public class Process {
     private String name;
-    //TL TIEMPO LLEGADA
     private int TL;
-    //TC TIEMPO CONSUMO
     private int TC;
-    //TP TIEMPO PROCESADO
     private int TP;
-    //bool para ver si esta en memoria
+    private String estado;
     private boolean mem;
-    // int listo=0 bloqueado=1 ejecucion=3
-    private int  estado;
+    private String inicio;
+    private String fin;
+
     private int generateRand(){
         Random random = new Random();
         int numeroAleatorio = random.nextInt(10) + 1;
@@ -33,29 +31,19 @@ public class Process {
         this.name = name;
         this.TC = generateRand();
         this.TL = generateRand();
-        this.TP=0;
+        this.TP = 0;
         this.mem=false;
+        this.estado = "-";
     }
     
     public Process() {
         this.name = name;
         this.TC = generateRand();
         this.TL = generateRand();
+        this.TP = 0;
+        this.estado = "-";
     }
-    public int getEstado(){
-        return this.estado;
-    }
-    
-    public void setEstado(int estado){
-        this.estado=estado;
-    }
-    public int getTP(){
-        return this.TP;
-    }
-    
-    public void setTP(int tp){
-        this.TP=tp;
-    }
+
     public String getName() {
         return name;
     }
@@ -85,7 +73,46 @@ public class Process {
     public void setTC(int TC) {
         this.TC = TC;
     }
-    
+
+    public boolean isMem() {
+        return mem;
+    }
+
+    public void setMem(boolean mem) {
+        this.mem = mem;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public int getTP() {
+        return TP;
+    }
+
+    public void setTP(int TP) {
+        this.TP = TP;
+    }
+
+    public String getInicio() {
+        return inicio;
+    }
+
+    public String getFin() {
+        return fin;
+    }
+
+    public void setInicio(String inicio) {
+        this.inicio = inicio;
+    }
+
+    public void setFin(String fin) {
+        this.fin = fin;
+    }
     
     
 }

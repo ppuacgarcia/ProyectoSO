@@ -24,10 +24,15 @@ public class Procesos extends javax.swing.JFrame{
     //variables generales
     private String[] Procesos = new String[15];
     private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"}; // variable que se usa para representar la matriz
-    public Process[] proc = new Process[10];
+    private String Direc_array[] = {"0xAFFh","0xA48h","0x98Ch","0x8D0h","0x814h","0x758h","0x69Ch","0x5E0h","0x524h","0x468h","0x3ACh","0x2F0h","0x234h","0x178h","0x0BCh","0x000h"}; // variable que se usa para direcciones de memoria por segundo
+    private Process[] proc = new Process[10];
     private Reloj HoraActual=new Reloj();
-    private RoundRobin CPU=new RoundRobin();
     private int mC=0; 
+    private Process[] proc_enMem = new Process[10];
+    private int cont_proc_enMem = 0;
+    private Calendar TiempoActual;
+    private RoundRobin rr = new RoundRobin(TiempoActual);
+    
     //metodo adicional para random
     private int generateRand(){
         Random random = new Random();
@@ -59,7 +64,7 @@ public class Procesos extends javax.swing.JFrame{
     
     //asignacion de procesos, TL y TC
     public void createProcess(){
-        char array[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K' };
+        char array[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
         //Crear procesos
         for(int i = 0; i < 10; i++){
             proc[i] = new Process(array[i]+"");
@@ -109,7 +114,20 @@ public class Procesos extends javax.swing.JFrame{
         modelT.addColumn("ESTADO");
         modelT.addColumn("HORA INICIO");
         modelT.addColumn("HORA FINALIZACION");
-        modelT.addRow(new Object[]{proc[0].getName(),"Ejecucion",this.jLabel7.getText(),""});
+        Calendar auxCal = TiempoActual;
+        int quantumAdd = 0;
+        for(int v = 0; v<cont_proc_enMem; v++){
+            if (v==0)
+            {
+                auxCal.add(Calendar.SECOND, proc_enMem[v].getTL());
+                modelT.addRow(new Object[]{proc_enMem[v].getName(),"-","-",""});
+            }
+            else
+            {
+                auxCal.add(Calendar.SECOND, proc_enMem[v].getTL()-proc_enMem[v-1].getTL());
+                modelT.addRow(new Object[]{proc_enMem[v].getName(),"-","-",""});
+            }
+        }
         this.ProcList.setModel(modelT);
         this.TextPlanificador.setText(proc[0].getName());
         
@@ -148,6 +166,8 @@ public class Procesos extends javax.swing.JFrame{
                         for (int j = 0; j < TLOrder[i].getTC(); j++) {
                             Mem_array[rnd-1+j] = TLOrder[i].getName();
                         }
+                        proc_enMem[cont_proc_enMem] = TLOrder[i];
+                        cont_proc_enMem++;
                         break;
                     }  
                 }
@@ -156,14 +176,15 @@ public class Procesos extends javax.swing.JFrame{
                 
             }
             if(spacemem == false){
-                    //System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
+                    System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
             }else {
                 this.mC++;
                 proc[i].setMem(true);
-                proc[i].setEstado(0);
             }
         }
-        
+        for(int v = 0; v<cont_proc_enMem; v++){
+            System.out.println(proc_enMem[v].getName());
+        }
         //insercion de los procesos a la lista de la memoria
         for(int i = 0; i < 16; i++){
             listmodel.addElement(Mem_array[i]);
@@ -183,10 +204,151 @@ public class Procesos extends javax.swing.JFrame{
     public Procesos() {
         initComponents();
         HoraActual.start();
-        
         clearElements();
     }
     
+    public class RoundRobin extends Thread {
+        private Calendar Tiempo;
+        private int TP;
+        private String Pactual;
+        private int quantum;
+
+        public RoundRobin(Calendar Tiempo) {
+            this.Tiempo = Tiempo;
+            this.TP=0;
+        }
+
+        public Calendar getTiempo() {
+            return Tiempo;
+        }
+
+        public void setTiempo(Calendar Tiempo) {
+            this.Tiempo = Tiempo;
+        }
+        
+        
+        @Override
+        public void run(){
+            int auxContP = 0;
+            try {
+                Thread.sleep(proc_enMem[auxContP].getTL()*1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            TextPlanificador.setText(proc_enMem[auxContP].getName());
+            proc_enMem[auxContP].setEstado("Ejecucion");
+            ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+            proc_enMem[auxContP].setInicio(jLabel7.getText());
+            ProcList.setValueAt(proc_enMem[auxContP].getInicio(), auxContP, 2);
+            this.TP = proc_enMem[auxContP].getTL();
+            this.quantum = 0;
+            int terminados = 0;
+            while (true){
+                for (int i = 0; i<cont_proc_enMem; i++){
+                    if ((this.TP==proc_enMem[i].getTL())/*&&(!proc_enMem[i].getEstado().equals("Ejecucion"))*/){
+                        if (proc_enMem[i].getEstado().equals("-")){
+                            proc_enMem[i].setInicio(jLabel7.getText());
+                            ProcList.setValueAt(proc_enMem[i].getInicio(), i, 2);
+                        }
+                        proc_enMem[i].setEstado("Listo");
+                        ProcList.setValueAt(proc_enMem[i].getEstado(), i, 1);
+                    }
+                    if (proc_enMem[i].getTP()>=proc_enMem[i].getTC()){
+                        if (proc_enMem[i].getEstado().equals("Listo")){
+                            proc_enMem[i].setFin(jLabel7.getText());
+                            ProcList.setValueAt(proc_enMem[i].getFin(), i, 3);
+                        }
+                        proc_enMem[i].setEstado("Terminado");
+                        ProcList.setValueAt(proc_enMem[i].getEstado(), i, 1);
+                        terminados++;
+                    }
+                }
+                if (terminados>=cont_proc_enMem){
+                    proc_enMem[auxContP].setFin(jLabel7.getText());
+                    ProcList.setValueAt(proc_enMem[auxContP].getFin(), auxContP, 3);
+                    proc_enMem[auxContP].setEstado("Terminado");
+                    ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                    System.out.println("Terminado");
+                    break;
+                }
+                else{
+                    terminados = 0;
+                }
+                if ((quantum<3)&&(proc_enMem[auxContP].getTP()<proc_enMem[auxContP].getTC())){
+                    TextPlanificador.setText(proc_enMem[auxContP].getName());
+                    proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
+                    proc_enMem[auxContP].setEstado("Ejecucion");
+                    ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                    quantum++;
+                }
+                else{
+                    if (proc_enMem[auxContP].getTP()>=proc_enMem[auxContP].getTC()){
+                        proc_enMem[auxContP].setFin(jLabel7.getText());
+                        ProcList.setValueAt(proc_enMem[auxContP].getFin(), auxContP, 3);
+                        proc_enMem[auxContP].setEstado("Terminado");
+                        ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                    }
+                    else{
+                        proc_enMem[auxContP].setEstado("Listo");
+                        ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                    }
+                    auxContP++;
+                    for(int k = 0; k<cont_proc_enMem; k++){
+                        if (auxContP>=cont_proc_enMem){
+                            auxContP=0; 
+                        }
+                        if ((proc_enMem[auxContP].getTP()<proc_enMem[auxContP].getTC())&&(proc_enMem[auxContP].getEstado().equals("Listo"))){
+                            TextPlanificador.setText(proc_enMem[auxContP].getName());
+                            proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
+                            proc_enMem[auxContP].setEstado("Ejecucion");
+                            ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                            quantum=1;
+                            break;
+                        }
+                        else{
+                            auxContP++;
+                        }
+                        //System.out.println(proc_enMem[auxContP].getName());
+                    }
+                    //this.quantum = 0;
+                }
+                try {
+                    Thread.sleep(920);
+                    this.TP ++;
+                    System.out.println(this.TP);
+                    System.out.println(proc_enMem[auxContP].getName());
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        
+    }
+    
+    public void ActualizarInicio(){
+        Calendar auxTime = TiempoActual;
+        for (int i = 0; i<cont_proc_enMem; i++){
+                if (i==0){
+                    try {
+                        Thread.sleep(proc_enMem[0].getTL()*1000);
+                        ProcList.setValueAt(jLabel7.getText(), 0, 1);
+                        ProcList.setValueAt(jLabel7.getText(), 0, 1);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                else{
+                    try {
+                        Thread.sleep(proc_enMem[0].getTL()*1000);
+                        ProcList.setValueAt(jLabel7.getText(), 0, 1);
+                        ProcList.setValueAt(jLabel7.getText(), 0, 1);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+    }
+     
     
 
     /**
@@ -371,9 +533,9 @@ public class Procesos extends javax.swing.JFrame{
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(TextH, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel13))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(23, 23, 23))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jLabel1.setText("CPU");
@@ -431,8 +593,7 @@ public class Procesos extends javax.swing.JFrame{
                     .addComponent(jLabel2)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel5)
@@ -440,9 +601,11 @@ public class Procesos extends javax.swing.JFrame{
                         .addComponent(jLabel10)
                         .addGap(18, 18, 18)
                         .addComponent(jLabel9)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 118, Short.MAX_VALUE)
-                        .addComponent(jLabel4)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 122, Short.MAX_VALUE)
+                        .addComponent(jLabel4)
+                        .addGap(22, 22, 22))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
@@ -456,7 +619,8 @@ public class Procesos extends javax.swing.JFrame{
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -469,8 +633,10 @@ public class Procesos extends javax.swing.JFrame{
 
     private void BtnInitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnInitActionPerformed
         // TODO add your handling code here:
+        TiempoActual = Calendar.getInstance();
         memory_fill();
-        this.CPU.start();
+        rr = new RoundRobin(TiempoActual);
+        rr.start();
     }//GEN-LAST:event_BtnInitActionPerformed
 
     /**
@@ -507,100 +673,35 @@ public class Procesos extends javax.swing.JFrame{
             }
         });
     }
-    public class RoundRobin extends Thread{
-        private String ex="";
-        private int c=0;
-        private int auxc=0;
-        private int tres=0;
-        private int quantum=3;
-        private boolean memVoid=false;
-        @Override
-        public void run(){
-            
-            while(true){
-                Process[] aux = new Process[10];
-               //aux=procesos que estan en memoria 
-               for(int i=0;i<10;i++){
-                   if(proc[i].getMem()){
-                        aux[c]=proc[i];
-                       c++;  
-                   }
-               }
-               if(c==0){
-                   memVoid=true;
-               }
-               //modificar estados
-               if(memVoid==false){
-                    aux[auxc].setEstado(3);
-                    for(int i=0;i<c;i++){
-                        if(aux[i]!=aux[auxc]){
-                            aux[i].setEstado(0);
-                        }
-                   }
-                   tres=aux[auxc].getTC()-aux[auxc].getTP()-this.quantum;
-                    if(tres>0){
-                         try {
-                          Thread.sleep(3000);
-                         } catch (InterruptedException ex) {
-                          Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
-                         }
-                         aux[auxc].setTP(aux[auxc].getTP()+this.quantum);
-                    }else if(aux[auxc].getTC()>aux[auxc].getTP()){
-                         int millis=(aux[auxc].getTC()-aux[auxc].getTP())*1000;
-                         System.out.println( millis);
-                         try {
-                          Thread.sleep(millis);
-                         } catch (InterruptedException ex) {
-                                Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
-                         }
-                         aux[auxc].setTP(aux[auxc].getTP()+(millis/1000));
-                         c--;
-                    }
-               }
-               
-               
-                if(memVoid){
-                   break;
-                }
-               if(aux[auxc].getTP()==aux[auxc].getTC()){
-                   aux[auxc].setMem(false);
-                   proc[auxc].setMem(false);
-               }
-               System.out.println("NAME"+ aux[auxc].getName()+" TL"+ aux[auxc].getTL()+" TC"+ aux[auxc].getTC()+
-                       " MEM"+ aux[auxc].getMem()+" Tiempo procesado:"+aux[auxc].getTP());
-               if(auxc<c){
-                    auxc++;
-               }
-               System.out.println("auxc "+auxc+" c"+c);
-               if(auxc==c){
-                   auxc=0;
-               }              
-               c=0;
-            }
-        }
+    
+    public String CalenToStr(Calendar calendario){
+        String horaSistema = "";
+        if (calendario.get(Calendar.HOUR_OF_DAY)<10)
+            horaSistema += String.valueOf("0"+calendario.get(Calendar.HOUR_OF_DAY)) + ":";
+        else
+            horaSistema += String.valueOf(calendario.get(Calendar.HOUR_OF_DAY)) + ":";
+        if (calendario.get(Calendar.MINUTE)<10)
+            horaSistema += String.valueOf("0"+calendario.get(Calendar.MINUTE)) + ":";
+        else
+            horaSistema += String.valueOf(calendario.get(Calendar.MINUTE)) + ":";
+        if (calendario.get(Calendar.SECOND)<10)
+            horaSistema += String.valueOf("0"+calendario.get(Calendar.SECOND)) + ":";
+        else
+            horaSistema += String.valueOf(calendario.get(Calendar.SECOND)) + ":";
+        horaSistema += String.valueOf(calendario.get(Calendar.MILLISECOND)) + " hrs";
+        return horaSistema;
     }
+    
     public class Reloj extends Thread {
         Calendar calendario;
+       
+        
         
         @Override
         public void run() {
             while (true) {
-                String horaSistema = "";
                 calendario = Calendar.getInstance();
-                if (calendario.get(Calendar.HOUR_OF_DAY)<10)
-                    horaSistema += String.valueOf("0"+calendario.get(Calendar.HOUR_OF_DAY)) + ":";
-                else
-                    horaSistema += String.valueOf(calendario.get(Calendar.HOUR_OF_DAY)) + ":";
-                if (calendario.get(Calendar.MINUTE)<10)
-                    horaSistema += String.valueOf("0"+calendario.get(Calendar.MINUTE)) + ":";
-                else
-                    horaSistema += String.valueOf(calendario.get(Calendar.MINUTE)) + ":";
-                if (calendario.get(Calendar.SECOND)<10)
-                    horaSistema += String.valueOf("0"+calendario.get(Calendar.SECOND)) + ":";
-                else
-                    horaSistema += String.valueOf(calendario.get(Calendar.SECOND)) + ":";
-                horaSistema += String.valueOf(calendario.get(Calendar.MILLISECOND)) + " hrs";
-                jLabel7.setText(horaSistema);
+                jLabel7.setText(CalenToStr(calendario));
                 try {
                     Thread.sleep(1);
                 } catch (InterruptedException ex) {
@@ -609,7 +710,6 @@ public class Procesos extends javax.swing.JFrame{
             }
         }
     }
-    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BtnInit;
     private javax.swing.JTable DescripTable;
