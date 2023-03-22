@@ -23,6 +23,8 @@ public class Process {
     private boolean mem;
     // int listo=0 bloqueado=1 ejecucion=3
     private int  estado;
+    private int memoryspace;
+    
     private int generateRand(){
         Random random = new Random();
         int numeroAleatorio = random.nextInt(10) + 1;
@@ -33,7 +35,7 @@ public class Process {
         this.name = name;
         this.TC = generateRand();
         this.TL = generateRand();
-        this.TP=0;
+        this.TP = this.TC;
         this.mem=false;
     }
     
@@ -41,12 +43,14 @@ public class Process {
         this.name = name;
         this.TC = generateRand();
         this.TL = generateRand();
+        this.TP = this.TC;
     }
     
     public Process(String name, int TC, int TL){
         this.name = name;
         this.TC = TC;
         this.TL = TL;
+        this.TP = this.TC;
     }
     
     public int getEstado(){
@@ -91,6 +95,14 @@ public class Process {
 
     public void setTC(int TC) {
         this.TC = TC;
+    }
+
+    public int getMemoryspace() {
+        return memoryspace;
+    }
+
+    public void setMemoryspace(int memoryspace) {
+        this.memoryspace = memoryspace;
     }
     
     

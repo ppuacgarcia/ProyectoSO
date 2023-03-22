@@ -145,6 +145,7 @@ public class Procesos extends javax.swing.JFrame{
                     if(verifypos(rnd-1, TLOrder[i].getTC()) == false){
                         aux = false;
                         //insercion de los procesos en el vector para luego ponerlos en la lista de memoria
+                        TLOrder[i].setMemoryspace(rnd - 1);
                         for (int j = 0; j < TLOrder[i].getTC(); j++) {
                             Mem_array[rnd-1+j] = TLOrder[i].getName();
                         }
@@ -167,10 +168,12 @@ public class Procesos extends javax.swing.JFrame{
         //insercion de los procesos a la lista de la memoria
         for(int i = 0; i < 16; i++){
             listmodel.addElement(Mem_array[i]);
+            
         }
         PMemoryList.setModel(listmodel);
         for(int i = 0; i < 10; i++){
             System.out.println(proc[i].getName()+" TL"+proc[i].getTL()+" TC"+proc[i].getTC()+" MEM"+proc[i].getMem());
+            
         }
         ListFill();
         proc = TLOrder;
@@ -457,7 +460,7 @@ public class Procesos extends javax.swing.JFrame{
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 597, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 614, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -520,6 +523,20 @@ public class Procesos extends javax.swing.JFrame{
         return timer;
     }
     
+    public void DeleteProcessMemory(Process aux){
+        DefaultListModel listmodel = new DefaultListModel();
+        
+            for(int j = 0; j < aux.getTP(); j++){
+                
+                Mem_array[j + aux.getMemoryspace()] = " ";
+            }
+        for(int i = 0; i < 16; i++){
+            listmodel.addElement(Mem_array[i]);
+            
+        }
+        PMemoryList.setModel(listmodel);
+    }
+    
     public class RoundRobin extends Thread{
         private String ex="";
         private Process[] aux = proc;
@@ -533,6 +550,7 @@ public class Procesos extends javax.swing.JFrame{
                 for(int i = 0; i < 10; i++){
                     if(aux[i].getMem() == true){
                         //Quitar tiempo de consumo en los procesos
+                        TextPlanificador.setText(aux[i].getName());
                         if(aux[i].getTC() > 3){
                             aux[i].setTC(aux[i].getTC() - 3);
                             for(int j = 0; j < 10; j++){
@@ -554,6 +572,7 @@ public class Procesos extends javax.swing.JFrame{
                             } catch (InterruptedException ex) {
                                 Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
                             }
+                            DeleteProcessMemory(aux[i]);
                         }else if(aux[i].getTC() == 2){
                             aux[i].setTC(aux[i].getTC() - 2);
                             aux[i].setMem(false);
@@ -565,6 +584,7 @@ public class Procesos extends javax.swing.JFrame{
                             } catch (InterruptedException ex) {
                                 Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
                             }
+                            DeleteProcessMemory(aux[i]);
                         }else if(aux[i].getTC() == 1){
                             aux[i].setTC(aux[i].getTC() - 1);
                             aux[i].setMem(false);
@@ -576,12 +596,12 @@ public class Procesos extends javax.swing.JFrame{
                             } catch (InterruptedException ex) {
                                 Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
                             }
+                            DeleteProcessMemory(aux[i]);
                         }
                     }
                     System.out.println("");
                     System.out.println("");
                 }
-                
             }
         }
     }
