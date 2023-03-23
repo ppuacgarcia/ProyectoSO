@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package proyectoso;
 
 import java.awt.Point;
@@ -15,11 +10,6 @@ import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-
-/**
- *
- * @author JAz
- */
 public class Procesos extends javax.swing.JFrame{
     //Procesos de referencia en consola para verificar el funcionamiento del programa
     //variables generales
@@ -124,7 +114,6 @@ public class Procesos extends javax.swing.JFrame{
         }
         this.ProcList.setModel(modelT);
         this.TextPlanificador.setText(proc[0].getName());
-        
     }
     //llenado de lista de memoria principal
     public void memory_fill(){
@@ -166,8 +155,6 @@ public class Procesos extends javax.swing.JFrame{
                     }  
                 }
                 if(k == 9) spacemem = false;
-               
-                
             }
             if(spacemem == false){
                     System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
@@ -183,8 +170,6 @@ public class Procesos extends javax.swing.JFrame{
         PMemoryList.setModel(listmodel);
         ListFill();
     }
-    
-    
     
     /**
      * Creates new form Procesos
@@ -212,7 +197,6 @@ public class Procesos extends javax.swing.JFrame{
             
             jLabel9.setLocation(pt9.x, b);
             jLabel10.setLocation(pt9.x, h);
-           
     }
     public class RoundRobin extends Thread {
         private Calendar Tiempo;
@@ -244,7 +228,6 @@ public class Procesos extends javax.swing.JFrame{
             proc_enMem[auxContP].setEstado("Ejecucion");
             int bpos=66+((proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20);
             int hpos=66+((proc_enMem[auxContP].getMemoryspace())*20);
-            
             position(bpos,hpos);
             TextB.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
             TextH.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()]);
@@ -258,19 +241,23 @@ public class Procesos extends javax.swing.JFrame{
                         if (proc_enMem[i].getEstado().equals("-")){
                             proc_enMem[i].setInicio(jLabel7.getText());
                             ProcList.setValueAt(proc_enMem[i].getInicio(), i, 2);
+                            TextPc.setText(this.Direc_array[proc_enMem[i].getMemoryspace()]);
                         }
                         proc_enMem[i].setEstado("Listo");
                         ProcList.setValueAt(proc_enMem[i].getEstado(), i, 1);
+                        TextPc.setText(this.Direc_array[proc_enMem[i].getMemoryspace()]);
                     }
                     if (proc_enMem[i].getTP()>=proc_enMem[i].getTC()){
                         if (proc_enMem[i].getEstado().equals("Listo")){
                             proc_enMem[i].setFin(jLabel7.getText());
                             ProcList.setValueAt(proc_enMem[i].getFin(), i, 3);
+                            TextPc.setText(this.Direc_array[proc_enMem[i].getMemoryspace()]);
                         }
                         proc_enMem[i].setEstado("Terminado");
                         DeleteProcessMemory(proc_enMem[i]);
                         ProcList.setValueAt(proc_enMem[i].getEstado(), i, 1);
                         terminados++;
+                        TextPc.setText(this.Direc_array[proc_enMem[i].getMemoryspace()]);
                     }
                 }
                 if (terminados>=cont_proc_enMem){
@@ -369,8 +356,6 @@ public class Procesos extends javax.swing.JFrame{
             }
     }
      
-    
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -658,7 +643,6 @@ public class Procesos extends javax.swing.JFrame{
         memory_fill();
         rr = new RoundRobin(TiempoActual);
         rr.start();
-       
     }//GEN-LAST:event_BtnInitActionPerformed
 
     /**
