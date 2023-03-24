@@ -5,6 +5,7 @@
  */
 package proyectoso;
 
+import java.awt.Point;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.logging.Level;
@@ -19,35 +20,30 @@ import javax.swing.table.TableColumn;
  */
 public class Procesos extends javax.swing.JFrame{
     //Procesos de referencia en consola para verificar el funcionamiento del programa
-    
-
     //variables generales
     private String[] Procesos = new String[15];
     private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"}; // variable que se usa para representar la matriz
-    private String Direc_array[] = {"0xAFFh","0xA48h","0x98Ch","0x8D0h","0x814h","0x758h","0x69Ch","0x5E0h","0x524h","0x468h","0x3ACh","0x2F0h","0x234h","0x178h","0x0BCh","0x000h"}; // variable que se usa para direcciones de memoria por segundo
+    private String Direc_array[] = {"0xAFFh","0xA5Ah","0x9B5h","0x910h","0x86Bh","0x7C6h","0x721h","0x67Ch","0x5D7h","0x532h","0x48Dh","0x3E8h","0x343h","0x29Eh","0x1F9h","0x154h","0x000h"};
+    // variable que se usa para direcciones de memoria por segundo
     private Process[] proc = new Process[10];
-    private Reloj HoraActual=new Reloj();
+    private Procesos.Reloj HoraActual=new Procesos.Reloj();
     private int mC=0; 
     private Process[] proc_enMem = new Process[10];
     private int cont_proc_enMem = 0;
     private Calendar TiempoActual;
     private RoundRobin rr = new RoundRobin(TiempoActual);
-    
     //metodo adicional para random
     private int generateRand(){
         Random random = new Random();
         int numeroAleatorio = random.nextInt(12) + 1;
         return numeroAleatorio;
     }
-    
-    
     //metodo de limpieza inicial
     public void clearElements(){
         TextPlanificador.setText("");
         TextPc.setText("");
         TextH.setText("");
         TextB.setText("");
-        
         //Limpiar tablas e insertar columnas
         createProcess();
         DefaultTableModel modelPL = new DefaultTableModel();
@@ -56,19 +52,22 @@ public class Procesos extends javax.swing.JFrame{
         modelPL.addColumn("Init");
         modelPL.addColumn("End");
         ProcList.setModel(modelPL);
-        
         //Limpiar lista al inicio de la ejecucion
         DefaultListModel listmodel = new DefaultListModel();
         PMemoryList.setModel(listmodel);
+        //DefaultListModel direcModel = new DefaultListModel();
+        //for(int i = 0; i < 16; i++){
+        //    direcModel.addElement(Direc_array[i]);
+        //}
+        //DireccionesList.setModel(direcModel);
+        DireccionesList.setListData(Direc_array);
     }
-    
     //asignacion de procesos, TL y TC
     public void createProcess(){
         char array[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
         //Crear procesos
         for(int i = 0; i < 10; i++){
             proc[i] = new Process(array[i]+"");
-            
         }
         //Modelo de Tabla
         DefaultTableModel modelDT = new DefaultTableModel();
@@ -150,7 +149,6 @@ public class Procesos extends javax.swing.JFrame{
         }
         //Escritura en la lista de memoria
         for (int i = 0; i < 10; i++) {
-           // System.out.println("Proceso " + TLOrder[i].getName());
             //Variables booleanas solo para verificacion de condiciones
             boolean spacemem = true;
             boolean aux = true;
@@ -163,6 +161,7 @@ public class Procesos extends javax.swing.JFrame{
                     if(verifypos(rnd-1, TLOrder[i].getTC()) == false){
                         aux = false;
                         //insercion de los procesos en el vector para luego ponerlos en la lista de memoria
+                        TLOrder[i].setMemoryspace(rnd - 1);
                         for (int j = 0; j < TLOrder[i].getTC(); j++) {
                             Mem_array[rnd-1+j] = TLOrder[i].getName();
                         }
@@ -182,17 +181,11 @@ public class Procesos extends javax.swing.JFrame{
                 proc[i].setMem(true);
             }
         }
-        for(int v = 0; v<cont_proc_enMem; v++){
-            System.out.println(proc_enMem[v].getName());
-        }
         //insercion de los procesos a la lista de la memoria
         for(int i = 0; i < 16; i++){
             listmodel.addElement(Mem_array[i]);
         }
         PMemoryList.setModel(listmodel);
-        for(int i = 0; i < 10; i++){
-            System.out.println(proc[i].getName()+" TL"+proc[i].getTL()+" TC"+proc[i].getTC()+" MEM"+proc[i].getMem());
-        }
         ListFill();
     }
     
@@ -206,13 +199,28 @@ public class Procesos extends javax.swing.JFrame{
         HoraActual.start();
         clearElements();
     }
+    public void DeleteProcessMemory(Process aux){
+        DefaultListModel listmodel = new DefaultListModel();
+        
+            for(int j = 0; j < aux.getTP(); j++){
+                
+                Mem_array[j + aux.getMemoryspace()] = " ";
+            }
+        for(int i = 0; i < 16; i++){
+            listmodel.addElement(Mem_array[i]);
+            
+        }
+        PMemoryList.setModel(listmodel);
+    }
+    
+    
     
     public class RoundRobin extends Thread {
         private Calendar Tiempo;
         private int TP;
         private String Pactual;
         private int quantum;
-
+        
         public RoundRobin(Calendar Tiempo) {
             this.Tiempo = Tiempo;
             this.TP=0;
@@ -226,6 +234,12 @@ public class Procesos extends javax.swing.JFrame{
             this.Tiempo = Tiempo;
         }
         
+        public void ActualizarBH(int contador){
+            String aux[] = Direc_array.clone();
+            aux[proc_enMem[contador].getMemoryspace()] = "h";
+            aux[proc_enMem[contador].getMemoryspace()+proc_enMem[contador].getTC()] = "b";
+            DireccionesList.setListData(aux);
+        }
         
         @Override
         public void run(){
@@ -237,38 +251,49 @@ public class Procesos extends javax.swing.JFrame{
             }
             TextPlanificador.setText(proc_enMem[auxContP].getName());
             proc_enMem[auxContP].setEstado("Ejecucion");
+            int bpos=66+((proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20);
+            int hpos=66+((proc_enMem[auxContP].getMemoryspace())*20);
+            
+            //position(bpos,hpos);
+            TextB.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
+            TextH.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()]);
             ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
             proc_enMem[auxContP].setInicio(jLabel7.getText());
             ProcList.setValueAt(proc_enMem[auxContP].getInicio(), auxContP, 2);
-            this.TP = proc_enMem[auxContP].getTL();
-            this.quantum = 0;
             int terminados = 0;
             while (true){
                 for (int i = 0; i<cont_proc_enMem; i++){
-                    if ((this.TP==proc_enMem[i].getTL())/*&&(!proc_enMem[i].getEstado().equals("Ejecucion"))*/){
+                    if ((this.TP==proc_enMem[i].getTL())){
                         if (proc_enMem[i].getEstado().equals("-")){
                             proc_enMem[i].setInicio(jLabel7.getText());
                             ProcList.setValueAt(proc_enMem[i].getInicio(), i, 2);
+                            TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
                         }
                         proc_enMem[i].setEstado("Listo");
                         ProcList.setValueAt(proc_enMem[i].getEstado(), i, 1);
+                        TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
                     }
                     if (proc_enMem[i].getTP()>=proc_enMem[i].getTC()){
                         if (proc_enMem[i].getEstado().equals("Listo")){
                             proc_enMem[i].setFin(jLabel7.getText());
                             ProcList.setValueAt(proc_enMem[i].getFin(), i, 3);
+                            TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
                         }
                         proc_enMem[i].setEstado("Terminado");
+                        DeleteProcessMemory(proc_enMem[i]);
                         ProcList.setValueAt(proc_enMem[i].getEstado(), i, 1);
                         terminados++;
+                        TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
                     }
                 }
                 if (terminados>=cont_proc_enMem){
                     proc_enMem[auxContP].setFin(jLabel7.getText());
                     ProcList.setValueAt(proc_enMem[auxContP].getFin(), auxContP, 3);
                     proc_enMem[auxContP].setEstado("Terminado");
+                    DeleteProcessMemory(proc_enMem[auxContP]);
                     ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                     System.out.println("Terminado");
+                    DireccionesList.setListData(Direc_array);
                     break;
                 }
                 else{
@@ -278,6 +303,9 @@ public class Procesos extends javax.swing.JFrame{
                     TextPlanificador.setText(proc_enMem[auxContP].getName());
                     proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
                     proc_enMem[auxContP].setEstado("Ejecucion");
+                    ActualizarBH(auxContP);
+                    TextB.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
+                    TextH.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()]);
                     ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                     quantum++;
                 }
@@ -286,11 +314,13 @@ public class Procesos extends javax.swing.JFrame{
                         proc_enMem[auxContP].setFin(jLabel7.getText());
                         ProcList.setValueAt(proc_enMem[auxContP].getFin(), auxContP, 3);
                         proc_enMem[auxContP].setEstado("Terminado");
+                        DeleteProcessMemory(proc_enMem[auxContP]); 
                         ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                     }
                     else{
                         proc_enMem[auxContP].setEstado("Listo");
                         ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                        //DireccionesList.set
                     }
                     auxContP++;
                     for(int k = 0; k<cont_proc_enMem; k++){
@@ -301,6 +331,12 @@ public class Procesos extends javax.swing.JFrame{
                             TextPlanificador.setText(proc_enMem[auxContP].getName());
                             proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
                             proc_enMem[auxContP].setEstado("Ejecucion");
+                            ActualizarBH(auxContP);
+                            bpos=66+(proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20;
+                            hpos=66+proc_enMem[auxContP].getMemoryspace()*20;
+                            
+                            TextB.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
+                            TextH.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()]);
                             ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                             quantum=1;
                             break;
@@ -308,23 +344,19 @@ public class Procesos extends javax.swing.JFrame{
                         else{
                             auxContP++;
                         }
-                        //System.out.println(proc_enMem[auxContP].getName());
+                       
                     }
-                    //this.quantum = 0;
+
                 }
                 try {
                     Thread.sleep(920);
                     this.TP ++;
-                    System.out.println(this.TP);
-                    System.out.println(proc_enMem[auxContP].getName());
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        }
-        
+        }  
     }
-    
     public void ActualizarInicio(){
         Calendar auxTime = TiempoActual;
         for (int i = 0; i<cont_proc_enMem; i++){
@@ -348,7 +380,7 @@ public class Procesos extends javax.swing.JFrame{
                 }
             }
     }
-     
+    
     
 
     /**
@@ -381,12 +413,10 @@ public class Procesos extends javax.swing.JFrame{
         jLabel13 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
+        jScrollPane4 = new javax.swing.JScrollPane();
+        DireccionesList = new javax.swing.JList<>();
 
         jLabel3.setText("Memoria Principal");
 
@@ -442,7 +472,7 @@ public class Procesos extends javax.swing.JFrame{
         jPanel2.setBackground(new java.awt.Color(204, 204, 204));
 
         PMemoryList.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9", "Item 10", "Item 11", "Item 12", "Item 13", "Item 14", "Item 15", "Item 16" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
@@ -466,7 +496,7 @@ public class Procesos extends javax.swing.JFrame{
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "ID", "Proceso", "H. Inicio", "H. Final"
             }
         ));
         jScrollPane3.setViewportView(ProcList);
@@ -533,57 +563,49 @@ public class Procesos extends javax.swing.JFrame{
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(TextH, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel13))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jLabel1.setText("CPU");
 
         jLabel2.setText("Memoria Principal");
 
-        jLabel4.setText("0x00h");
-
-        jLabel5.setText("0x00h");
-
         jLabel6.setText("Hora del Sistema");
 
         jLabel7.setText("00:00:00 hrs");
 
-        jLabel9.setText("b");
-
-        jLabel10.setText("h");
+        DireccionesList.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane4.setViewportView(DireccionesList);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGap(70, 70, 70)
-                .addComponent(jLabel2)
-                .addGap(226, 226, 226)
-                .addComponent(jLabel1)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(40, 40, 40)
+                        .addComponent(jLabel2)
+                        .addGap(226, 226, 226)
+                        .addComponent(jLabel1))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                            .addComponent(jLabel7)
+                            .addGap(136, 136, 136))
+                        .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(29, 29, 29)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel10)
-                            .addComponent(jLabel9)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.LEADING))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(29, 29, 29)
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addGap(136, 136, 136))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
-                        .addGap(353, 353, 353)
-                        .addComponent(jLabel6)))
-                .addGap(465, 465, 465))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -592,20 +614,17 @@ public class Procesos extends javax.swing.JFrame{
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addGap(136, 136, 136)
-                        .addComponent(jLabel10)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel9)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 122, Short.MAX_VALUE)
-                        .addComponent(jLabel4)
-                        .addGap(22, 22, 22))
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(12, 12, 12))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(3, 3, 3)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
@@ -619,7 +638,7 @@ public class Procesos extends javax.swing.JFrame{
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -637,6 +656,7 @@ public class Procesos extends javax.swing.JFrame{
         memory_fill();
         rr = new RoundRobin(TiempoActual);
         rr.start();
+        
     }//GEN-LAST:event_BtnInitActionPerformed
 
     /**
@@ -710,9 +730,11 @@ public class Procesos extends javax.swing.JFrame{
             }
         }
     }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BtnInit;
     private javax.swing.JTable DescripTable;
+    private javax.swing.JList<String> DireccionesList;
     private javax.swing.JList<String> PMemoryList;
     private javax.swing.JTable ProcList;
     private javax.swing.JTextField TextB;
@@ -720,23 +742,20 @@ public class Procesos extends javax.swing.JFrame{
     private javax.swing.JTextField TextPc;
     private javax.swing.JTextField TextPlanificador;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane4;
     // End of variables declaration//GEN-END:variables
 }

@@ -5,6 +5,7 @@
  */
 package proyectoso;
 
+import java.util.Calendar;
 import java.util.Random;
 
 /**
@@ -20,6 +21,7 @@ public class Process {
     private boolean mem;
     private String inicio;
     private String fin;
+    private int memoryspace;
 
     private int generateRand(){
         Random random = new Random();
@@ -114,5 +116,11 @@ public class Process {
         this.fin = fin;
     }
     
+    public int getMemoryspace() {
+        return memoryspace;
+    }
+    public void setMemoryspace(int memoryspace) {
+        this.memoryspace = memoryspace;
+    }
     
 }
