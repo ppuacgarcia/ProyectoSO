@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -213,7 +214,17 @@ public class Procesos extends javax.swing.JFrame{
         PMemoryList.setModel(listmodel);
     }
     
-    
+    public String Insufficient_memory(){
+        String R = "Los procesos: ";
+        for(int i = 0; i < 10; i++){
+            if(proc[i].getMem() == false){
+                R = R + proc[i].getName() + " ";
+            }
+        }
+        R = R + "no pudieron ser agregados a la memoria por falta de espacio";
+        return R;
+    }
+
     
     public class RoundRobin extends Thread {
         private Calendar Tiempo;
@@ -656,6 +667,8 @@ public class Procesos extends javax.swing.JFrame{
         memory_fill();
         rr = new RoundRobin(TiempoActual);
         rr.start();
+        String strprocesos = Insufficient_memory()+"";
+        JOptionPane.showMessageDialog(null, strprocesos);
         
     }//GEN-LAST:event_BtnInitActionPerformed
 
