@@ -208,6 +208,20 @@ public class Procesos extends javax.swing.JFrame{
         }
         PMemoryList.setModel(listmodel);
     }
+    
+    public void SetBH(Process procesoactual){
+        for(int i = 0; i < 10; i++){
+            BH[i] = " ";
+        }
+        BH[procesoactual.getMemoryspace()] = "H";
+        BH[procesoactual.getMemoryspace() + procesoactual.getTC()-1] = "B";
+        DefaultListModel listmodel = new DefaultListModel();
+        for(int i = 0; i < 10; i++){
+            listmodel.addElement(BH[i]);
+        }
+        ListBH.setModel(listmodel);
+        
+    }
     public class RoundRobin extends Thread {
         private Calendar Tiempo;
         private int TP;
@@ -236,11 +250,9 @@ public class Procesos extends javax.swing.JFrame{
             }
             TextPlanificador.setText(proc_enMem[auxContP].getName());
             proc_enMem[auxContP].setEstado("Ejecucion");
-            int bpos=66+((proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20);
-            int hpos=66+((proc_enMem[auxContP].getMemoryspace())*20);
-            
             TextB.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
             TextH.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()]);
+            SetBH(proc_enMem[auxContP]);
             ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
             proc_enMem[auxContP].setInicio(jLabel7.getText());
             ProcList.setValueAt(proc_enMem[auxContP].getInicio(), auxContP, 2);
@@ -288,6 +300,7 @@ public class Procesos extends javax.swing.JFrame{
                     proc_enMem[auxContP].setEstado("Ejecucion");
                     TextB.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
                     TextH.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()]);
+                    SetBH(proc_enMem[auxContP]);
                     ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                     quantum++;
                 }
@@ -314,6 +327,7 @@ public class Procesos extends javax.swing.JFrame{
                             proc_enMem[auxContP].setEstado("Ejecucion");
                             TextB.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
                             TextH.setText(this.Direc_array[proc_enMem[auxContP].getMemoryspace()]);
+                            SetBH(proc_enMem[auxContP]);
                             ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                             quantum=1;
                             break;
