@@ -22,7 +22,7 @@ public class Procesos extends javax.swing.JFrame{
     //Procesos de referencia en consola para verificar el funcionamiento del programa
     //variables generales
     private String[] Procesos = new String[15];
-    private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"}; // variable que se usa para representar la matriz
+    private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," ","Activador","SO","SO"}; // variable que se usa para representar la matriz
     private String Direc_array[] = {"0xAFFh","0xA5Ah","0x9B5h","0x910h","0x86Bh","0x7C6h","0x721h","0x67Ch","0x5D7h","0x532h","0x48Dh","0x3E8h","0x343h","0x29Eh","0x1F9h","0x154h","0x000h"};
     // variable que se usa para direcciones de memoria por segundo
     private Process[] proc = new Process[10];
@@ -220,6 +220,7 @@ public class Procesos extends javax.swing.JFrame{
         private int TP;
         private String Pactual;
         private int quantum;
+        private String preProceso = "-";
         
         public RoundRobin(Calendar Tiempo) {
             this.Tiempo = Tiempo;
@@ -239,6 +240,31 @@ public class Procesos extends javax.swing.JFrame{
             aux[proc_enMem[contador].getMemoryspace()] = "h";
             aux[proc_enMem[contador].getMemoryspace()+proc_enMem[contador].getTC()] = "b";
             DireccionesList.setListData(aux);
+        }
+        
+        public void Activador(String proceso){
+            if (!preProceso.equals(proceso)){
+                preProceso = proceso;
+                TextPlanificador.setText("Activador");
+                String aux[] = Direc_array.clone();
+                TextH.setText(aux[aux.length-3]);
+                TextB.setText(aux[aux.length-4]);
+                aux[aux.length-3] = "h";
+                aux[aux.length-4] = "b";
+                DireccionesList.setListData(aux);
+                TextPc.setText(TextH.getText());
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                TextPc.setText(TextB.getText());
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         
         @Override
@@ -328,6 +354,7 @@ public class Procesos extends javax.swing.JFrame{
                             auxContP=0; 
                         }
                         if ((proc_enMem[auxContP].getTP()<proc_enMem[auxContP].getTC())&&(proc_enMem[auxContP].getEstado().equals("Listo"))){
+                            Activador(proc_enMem[auxContP].getName());
                             TextPlanificador.setText(proc_enMem[auxContP].getName());
                             proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
                             proc_enMem[auxContP].setEstado("Ejecucion");
