@@ -136,7 +136,7 @@ public class Procesos extends javax.swing.JFrame{
         processVerify();
         boolean bandera = false;
         DefaultListModel listmodel = new DefaultListModel();
-        Process[] TLOrder = this.proc;
+        Process[] TLOrder = this.proc.clone();
         //Ordenamiento Burbuja para tiempos de llegada
         for (int i = 0; i < 10 - 1; i++) {
             for (int j = 0; j < 10 - i - 1; j++) {
@@ -440,6 +440,7 @@ public class Procesos extends javax.swing.JFrame{
         jScrollPane1 = new javax.swing.JScrollPane();
         DescripTable = new javax.swing.JTable();
         BtnInit = new javax.swing.JButton();
+        btnReiniciar = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         PMemoryList = new javax.swing.JList<>();
@@ -488,6 +489,13 @@ public class Procesos extends javax.swing.JFrame{
             }
         });
 
+        btnReiniciar.setText("Reiniciar");
+        btnReiniciar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReiniciarActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -499,7 +507,9 @@ public class Procesos extends javax.swing.JFrame{
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(82, 82, 82)
-                        .addComponent(BtnInit, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnReiniciar)
+                            .addComponent(BtnInit, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap(44, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -509,6 +519,8 @@ public class Procesos extends javax.swing.JFrame{
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(BtnInit, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnReiniciar)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -699,8 +711,18 @@ public class Procesos extends javax.swing.JFrame{
         memory_fill();
         rr = new RoundRobin(TiempoActual);
         rr.start();
-        
     }//GEN-LAST:event_BtnInitActionPerformed
+
+    private void btnReiniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReiniciarActionPerformed
+        Procesos = new String[15];
+        String aux[] = {" "," "," "," "," "," "," "," "," "," "," "," "," ","Activador","SO","SO"};
+        Mem_array = aux.clone();
+        
+        proc = new Process[10];
+        proc_enMem = new Process[10];
+        cont_proc_enMem = 0;
+        clearElements();
+    }//GEN-LAST:event_btnReiniciarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -784,6 +806,7 @@ public class Procesos extends javax.swing.JFrame{
     private javax.swing.JTextField TextH;
     private javax.swing.JTextField TextPc;
     private javax.swing.JTextField TextPlanificador;
+    private javax.swing.JButton btnReiniciar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
