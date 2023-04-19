@@ -1,8 +1,6 @@
 package proyectoso;
 
 import java.awt.Point;
-import static java.awt.image.ImageObserver.HEIGHT;
-import static java.awt.image.ImageObserver.WIDTH;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.logging.Level;
@@ -15,11 +13,11 @@ public class Procesos extends javax.swing.JFrame{
     //Procesos de referencia en consola para verificar el funcionamiento del programa
     //variables generales
     private String[] Procesos = new String[15];
-    private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"}; // variable que se usa para representar la matriz
-    private String BH[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," "," "," "};
+    private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," ","Activador","SO","SO"}; // variable que se usa para representar la matriz
+    private String Direc_array[] = {"0xAFFh","0xA5Ah","0x9B5h","0x910h","0x86Bh","0x7C6h","0x721h","0x67Ch","0x5D7h","0x532h","0x48Dh","0x3E8h","0x343h","0x29Eh","0x1F9h","0x154h","0x000h"};
     // variable que se usa para direcciones de memoria por segundo
     private Process[] proc = new Process[10];
-    private Reloj HoraActual=new Reloj();
+    private Procesos.Reloj HoraActual=new Procesos.Reloj();
     private int mC=0; 
     private Process[] proc_enMem = new Process[10];
     private int cont_proc_enMem = 0;
@@ -49,7 +47,12 @@ public class Procesos extends javax.swing.JFrame{
         //Limpiar lista al inicio de la ejecucion
         DefaultListModel listmodel = new DefaultListModel();
         PMemoryList.setModel(listmodel);
-        ListBH.setModel(listmodel);
+        //DefaultListModel direcModel = new DefaultListModel();
+        //for(int i = 0; i < 16; i++){
+        //    direcModel.addElement(Direc_array[i]);
+        //}
+        //DireccionesList.setModel(direcModel);
+        DireccionesList.setListData(Direc_array);
     }
     //asignacion de procesos, TL y TC
     public void createProcess(){
@@ -182,6 +185,214 @@ public class Procesos extends javax.swing.JFrame{
         initComponents();
         HoraActual.start();
         clearElements();
+    }
+    public void DeleteProcessMemory(Process aux){
+        DefaultListModel listmodel = new DefaultListModel();
+        
+            for(int j = 0; j < aux.getTP(); j++){
+                
+                Mem_array[j + aux.getMemoryspace()] = " ";
+            }
+        for(int i = 0; i < 16; i++){
+            listmodel.addElement(Mem_array[i]);
+            
+        }
+        PMemoryList.setModel(listmodel);
+    }
+    
+    
+    
+    public class RoundRobin extends Thread {
+        private Calendar Tiempo;
+        private int TP;
+        private String Pactual;
+        private int quantum;
+        private String preProceso = "-";
+        
+        public RoundRobin(Calendar Tiempo) {
+            this.Tiempo = Tiempo;
+            this.TP=0;
+        }
+
+        public Calendar getTiempo() {
+            return Tiempo;
+        }
+
+        public void setTiempo(Calendar Tiempo) {
+            this.Tiempo = Tiempo;
+        }
+        
+        public void ActualizarBH(int contador){
+            String aux[] = Direc_array.clone();
+            aux[proc_enMem[contador].getMemoryspace()] = "h";
+            aux[proc_enMem[contador].getMemoryspace()+proc_enMem[contador].getTC()] = "b";
+            DireccionesList.setListData(aux);
+        }
+        
+        public void Activador(String proceso){
+            if (!preProceso.equals(proceso)){
+                preProceso = proceso;
+                TextPlanificador.setText("Activador");
+                String aux[] = Direc_array.clone();
+                TextH.setText(aux[aux.length-3]);
+                TextB.setText(aux[aux.length-4]);
+                aux[aux.length-3] = "h";
+                aux[aux.length-4] = "b";
+                DireccionesList.setListData(aux);
+                TextPc.setText(TextH.getText());
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                TextPc.setText(TextB.getText());
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        
+        @Override
+        public void run(){
+            int auxContP = 0;
+            try {
+                Thread.sleep(proc_enMem[auxContP].getTL()*1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            TextPlanificador.setText(proc_enMem[auxContP].getName());
+            proc_enMem[auxContP].setEstado("Ejecucion");
+            int bpos=66+((proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20);
+            int hpos=66+((proc_enMem[auxContP].getMemoryspace())*20);
+            
+            //position(bpos,hpos);
+            TextB.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
+            TextH.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()]);
+            ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+            proc_enMem[auxContP].setInicio(jLabel7.getText());
+            ProcList.setValueAt(proc_enMem[auxContP].getInicio(), auxContP, 2);
+            int terminados = 0;
+            while (true){
+                for (int i = 0; i<cont_proc_enMem; i++){
+                    if ((this.TP==proc_enMem[i].getTL())){
+                        if (proc_enMem[i].getEstado().equals("-")){
+                            proc_enMem[i].setInicio(jLabel7.getText());
+                            ProcList.setValueAt(proc_enMem[i].getInicio(), i, 2);
+                            TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
+                        }
+                        proc_enMem[i].setEstado("Listo");
+                        ProcList.setValueAt(proc_enMem[i].getEstado(), i, 1);
+                        TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
+                    }
+                    if (proc_enMem[i].getTP()>=proc_enMem[i].getTC()){
+                        if (proc_enMem[i].getEstado().equals("Listo")){
+                            proc_enMem[i].setFin(jLabel7.getText());
+                            ProcList.setValueAt(proc_enMem[i].getFin(), i, 3);
+                            TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
+                        }
+                        proc_enMem[i].setEstado("Terminado");
+                        DeleteProcessMemory(proc_enMem[i]);
+                        ProcList.setValueAt(proc_enMem[i].getEstado(), i, 1);
+                        terminados++;
+                        TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
+                    }
+                }
+                if (terminados>=cont_proc_enMem){
+                    proc_enMem[auxContP].setFin(jLabel7.getText());
+                    ProcList.setValueAt(proc_enMem[auxContP].getFin(), auxContP, 3);
+                    proc_enMem[auxContP].setEstado("Terminado");
+                    DeleteProcessMemory(proc_enMem[auxContP]);
+                    ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                    System.out.println("Terminado");
+                    DireccionesList.setListData(Direc_array);
+                    break;
+                }
+                else{
+                    terminados = 0;
+                }
+                if ((quantum<3)&&(proc_enMem[auxContP].getTP()<proc_enMem[auxContP].getTC())){
+                    TextPlanificador.setText(proc_enMem[auxContP].getName());
+                    proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
+                    proc_enMem[auxContP].setEstado("Ejecucion");
+                    ActualizarBH(auxContP);
+                    TextB.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
+                    TextH.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()]);
+                    ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                    quantum++;
+                }
+                else{
+                    if (proc_enMem[auxContP].getTP()>=proc_enMem[auxContP].getTC()){
+                        proc_enMem[auxContP].setFin(jLabel7.getText());
+                        ProcList.setValueAt(proc_enMem[auxContP].getFin(), auxContP, 3);
+                        proc_enMem[auxContP].setEstado("Terminado");
+                        DeleteProcessMemory(proc_enMem[auxContP]); 
+                        ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                    }
+                    else{
+                        proc_enMem[auxContP].setEstado("Listo");
+                        ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                        //DireccionesList.set
+                    }
+                    auxContP++;
+                    for(int k = 0; k<cont_proc_enMem; k++){
+                        if (auxContP>=cont_proc_enMem){
+                            auxContP=0; 
+                        }
+                        if ((proc_enMem[auxContP].getTP()<proc_enMem[auxContP].getTC())&&(proc_enMem[auxContP].getEstado().equals("Listo"))){
+                            Activador(proc_enMem[auxContP].getName());
+                            TextPlanificador.setText(proc_enMem[auxContP].getName());
+                            proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
+                            proc_enMem[auxContP].setEstado("Ejecucion");
+                            ActualizarBH(auxContP);
+                            bpos=66+(proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20;
+                            hpos=66+proc_enMem[auxContP].getMemoryspace()*20;
+                            
+                            TextB.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC()]);
+                            TextH.setText(Direc_array[proc_enMem[auxContP].getMemoryspace()]);
+                            ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
+                            quantum=1;
+                            break;
+                        }
+                        else{
+                            auxContP++;
+                        }
+                       
+                    }
+
+                }
+                try {
+                    Thread.sleep(920);
+                    this.TP ++;
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }  
+    }
+    public void ActualizarInicio(){
+        Calendar auxTime = TiempoActual;
+        for (int i = 0; i<cont_proc_enMem; i++){
+                if (i==0){
+                    try {
+                        Thread.sleep(proc_enMem[0].getTL()*1000);
+                        ProcList.setValueAt(jLabel7.getText(), 0, 1);
+                        ProcList.setValueAt(jLabel7.getText(), 0, 1);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                else{
+                    try {
+                        Thread.sleep(proc_enMem[0].getTL()*1000);
+                        ProcList.setValueAt(jLabel7.getText(), 0, 1);
+                        ProcList.setValueAt(jLabel7.getText(), 0, 1);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
     }
     
     public String Insufficient_memory(){
@@ -402,12 +613,10 @@ public class Procesos extends javax.swing.JFrame{
         jLabel13 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
         jScrollPane4 = new javax.swing.JScrollPane();
-        ListBH = new javax.swing.JList<>();
+        DireccionesList = new javax.swing.JList<>();
 
         jLabel3.setText("Memoria Principal");
 
@@ -463,7 +672,7 @@ public class Procesos extends javax.swing.JFrame{
         jPanel2.setBackground(new java.awt.Color(204, 204, 204));
 
         PMemoryList.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9", "Item 10", "Item 11", "Item 12", "Item 13", "Item 14", "Item 15", "Item 16" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
@@ -487,7 +696,7 @@ public class Procesos extends javax.swing.JFrame{
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "ID", "Proceso", "H. Inicio", "H. Final"
             }
         ));
         jScrollPane3.setViewportView(ProcList);
@@ -554,63 +763,49 @@ public class Procesos extends javax.swing.JFrame{
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(TextH, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel13))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jLabel1.setText("CPU");
 
         jLabel2.setText("Memoria Principal");
 
-        jLabel4.setText("0x00h");
-
-        jLabel5.setText("0x104h");
-
         jLabel6.setText("Hora del Sistema");
 
         jLabel7.setText("00:00:00 hrs");
 
-        ListBH.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+        DireccionesList.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "-" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane4.setViewportView(ListBH);
+        jScrollPane4.setViewportView(DireccionesList);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel6))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel7)
-                        .addGap(136, 136, 136))
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel5)
-                                .addGap(12, 12, 12))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                                .addGap(19, 19, 19)))
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(29, 29, 29)
-                                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addGap(22, 22, 22)
-                                .addComponent(jLabel2)
-                                .addGap(226, 226, 226)
-                                .addComponent(jLabel1)))))
-                .addGap(465, 465, 465))
+                        .addGap(40, 40, 40)
+                        .addComponent(jLabel2)
+                        .addGap(226, 226, 226)
+                        .addComponent(jLabel1))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                            .addComponent(jLabel7)
+                            .addGap(136, 136, 136))
+                        .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(29, 29, 29)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -618,17 +813,19 @@ public class Procesos extends javax.swing.JFrame{
                 .addGap(38, 38, 38)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel5))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane4))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(jLabel4))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2)
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(12, 12, 12))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(3, 3, 3)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
                 .addGap(17, 17, 17))
@@ -641,7 +838,7 @@ public class Procesos extends javax.swing.JFrame{
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 632, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -655,13 +852,11 @@ public class Procesos extends javax.swing.JFrame{
 
     private void BtnInitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnInitActionPerformed
         // TODO add your handling code here:
-        
         TiempoActual = Calendar.getInstance();
         memory_fill();
         rr = new RoundRobin(TiempoActual);
         rr.start();
-        String strprocesos = Insufficient_memory()+"";
-        JOptionPane.showMessageDialog(null, strprocesos);
+        
     }//GEN-LAST:event_BtnInitActionPerformed
 
     /**
@@ -699,6 +894,7 @@ public class Procesos extends javax.swing.JFrame{
             }
         });
     }
+    
     public String CalenToStr(Calendar calendario){
         String horaSistema = "";
         if (calendario.get(Calendar.HOUR_OF_DAY)<10)
@@ -711,12 +907,17 @@ public class Procesos extends javax.swing.JFrame{
             horaSistema += String.valueOf(calendario.get(Calendar.MINUTE)) + ":";
         if (calendario.get(Calendar.SECOND)<10)
             horaSistema += String.valueOf("0"+calendario.get(Calendar.SECOND)) + ":";
-        else horaSistema += String.valueOf(calendario.get(Calendar.SECOND)) + ":";
+        else
+            horaSistema += String.valueOf(calendario.get(Calendar.SECOND)) + ":";
         horaSistema += String.valueOf(calendario.get(Calendar.MILLISECOND)) + " hrs";
         return horaSistema;
     }
+    
     public class Reloj extends Thread {
         Calendar calendario;
+       
+        
+        
         @Override
         public void run() {
             while (true) {
@@ -733,7 +934,7 @@ public class Procesos extends javax.swing.JFrame{
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BtnInit;
     private javax.swing.JTable DescripTable;
-    private javax.swing.JList<String> ListBH;
+    private javax.swing.JList<String> DireccionesList;
     private javax.swing.JList<String> PMemoryList;
     private javax.swing.JTable ProcList;
     private javax.swing.JTextField TextB;
@@ -746,8 +947,6 @@ public class Procesos extends javax.swing.JFrame{
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
