@@ -707,6 +707,8 @@ public class Procesos extends javax.swing.JFrame{
 
     private void BtnInitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnInitActionPerformed
         // TODO add your handling code here:
+        btnReiniciar.setEnabled(true);
+        BtnInit.setEnabled(false);
         TiempoActual = Calendar.getInstance();
         memory_fill();
         rr = new RoundRobin(TiempoActual);
@@ -714,10 +716,11 @@ public class Procesos extends javax.swing.JFrame{
     }//GEN-LAST:event_BtnInitActionPerformed
 
     private void btnReiniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReiniciarActionPerformed
+        btnReiniciar.setEnabled(false);
+        BtnInit.setEnabled(true);
         Procesos = new String[15];
         String aux[] = {" "," "," "," "," "," "," "," "," "," "," "," "," ","Activador","SO","SO"};
         Mem_array = aux.clone();
-        
         proc = new Process[10];
         proc_enMem = new Process[10];
         cont_proc_enMem = 0;
