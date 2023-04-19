@@ -147,6 +147,7 @@ public class Procesos extends javax.swing.JFrame{
                 }
             }
         }
+        String[] auxMem = Mem_array.clone();
         //Escritura en la lista de memoria
         for (int i = 0; i < 10; i++) {
             //Variables booleanas solo para verificacion de condiciones
@@ -156,8 +157,9 @@ public class Procesos extends javax.swing.JFrame{
             for(int k = 0; k < 10; k++){
                 //generar numero random para ponerlo en la memoria
                 int rnd = generateRand();
-               
+                
                 if(rnd + TLOrder[i].getTC() - 1 < 14){
+                    
                     if(verifypos(rnd-1, TLOrder[i].getTC()) == false){
                         aux = false;
                         //insercion de los procesos en el vector para luego ponerlos en la lista de memoria
@@ -182,10 +184,11 @@ public class Procesos extends javax.swing.JFrame{
             }
         }
         //insercion de los procesos a la lista de la memoria
-        for(int i = 0; i < 16; i++){
-            listmodel.addElement(Mem_array[i]);
-        }
-        PMemoryList.setModel(listmodel);
+        //for(int i = 0; i < 16; i++){
+        //    listmodel.addElement(Mem_array[i]);
+        //}
+        //PMemoryList.setModel(listmodel);
+        Mem_array = auxMem.clone();
         ListFill();
     }
     
@@ -213,7 +216,17 @@ public class Procesos extends javax.swing.JFrame{
         PMemoryList.setModel(listmodel);
     }
     
-    
+    public void AddProcessMemory(Process aux){
+        DefaultListModel listmodel = new DefaultListModel();
+        for(int j = 0; j < aux.getTC(); j++){
+
+            Mem_array[j + aux.getMemoryspace()] = aux.getName();
+        }
+        for(int i = 0; i < 16; i++){
+            listmodel.addElement(Mem_array[i]);
+        }
+        PMemoryList.setModel(listmodel);
+    }
     
     public class RoundRobin extends Thread {
         private Calendar Tiempo;
@@ -275,6 +288,7 @@ public class Procesos extends javax.swing.JFrame{
             } catch (InterruptedException ex) {
                 Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
             }
+            AddProcessMemory(proc_enMem[auxContP]);
             TextPlanificador.setText(proc_enMem[auxContP].getName());
             proc_enMem[auxContP].setEstado("Ejecucion");
             int bpos=66+((proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20);
@@ -295,6 +309,7 @@ public class Procesos extends javax.swing.JFrame{
                             ProcList.setValueAt(proc_enMem[i].getInicio(), i, 2);
                             TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
                         }
+                        AddProcessMemory(proc_enMem[i]);
                         proc_enMem[i].setEstado("Listo");
                         ProcList.setValueAt(proc_enMem[i].getEstado(), i, 1);
                         TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
@@ -344,6 +359,7 @@ public class Procesos extends javax.swing.JFrame{
                         ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                     }
                     else{
+                        AddProcessMemory(proc_enMem[auxContP]);
                         proc_enMem[auxContP].setEstado("Listo");
                         ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                         //DireccionesList.set
