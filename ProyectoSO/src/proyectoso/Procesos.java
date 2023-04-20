@@ -1,5 +1,6 @@
 package proyectoso;
 
+//Librerias para uso del proyecto
 import java.awt.Point;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -81,6 +82,8 @@ public class Procesos extends javax.swing.JFrame{
         }
         return bandera;
     }
+    
+    
     public void processVerify(){
         DefaultTableModel modelDT2 = new DefaultTableModel();
         modelDT2=(DefaultTableModel) DescripTable.getModel();
@@ -144,9 +147,7 @@ public class Procesos extends javax.swing.JFrame{
             for(int k = 0; k < 10; k++){
                 //generar numero random para ponerlo en la memoria
                 int rnd = generateRand();
-                
                 if(rnd + TLOrder[i].getTC() - 1 < 14){
-                    
                     if(verifypos(rnd-1, TLOrder[i].getTC()) == false){
                         aux = false;
                         //insercion de los procesos en el vector para luego ponerlos en la lista de memoria
@@ -238,6 +239,7 @@ public class Procesos extends javax.swing.JFrame{
                 String aux[] = Direc_array.clone();
                 TextH.setText(aux[aux.length-3]);
                 TextB.setText(aux[aux.length-4]);
+                //colocar etiquetas b y h en activador
                 aux[aux.length-3] = "h";
                 aux[aux.length-4] = "b";
                 DireccionesList.setListData(aux);
@@ -303,19 +305,20 @@ public class Procesos extends javax.swing.JFrame{
                         TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
                     }
                 }
+                //al terminar los procesos terminados que estan dentro de la meoria se termina el ciclo
                 if (terminados>=cont_proc_enMem){
                     proc_enMem[auxContP].setFin(jLabel7.getText());
                     ProcList.setValueAt(proc_enMem[auxContP].getFin(), auxContP, 3);
                     proc_enMem[auxContP].setEstado("Terminado");
                     DeleteProcessMemory(proc_enMem[auxContP]);
                     ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
-                    System.out.println("Terminado");
                     DireccionesList.setListData(Direc_array);
                     break;
                 }
                 else{
                     terminados = 0;
                 }
+                //Si el tiempo procesado es menor a 3 se pone en ejecucion y se actualizan procesos
                 if ((quantum<3)&&(proc_enMem[auxContP].getTP()<proc_enMem[auxContP].getTC())){
                     TextPlanificador.setText(proc_enMem[auxContP].getName());
                     proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
@@ -327,6 +330,8 @@ public class Procesos extends javax.swing.JFrame{
                     quantum++;
                 }
                 else{
+                    //Si el tiempo procesado es igual al quantum
+                    //Si el proceso ya no requiere mas tiempo el estado se marca como terminado
                     if (proc_enMem[auxContP].getTP()>=proc_enMem[auxContP].getTC()){
                         proc_enMem[auxContP].setFin(jLabel7.getText());
                         ProcList.setValueAt(proc_enMem[auxContP].getFin(), auxContP, 3);
@@ -334,17 +339,18 @@ public class Procesos extends javax.swing.JFrame{
                         DeleteProcessMemory(proc_enMem[auxContP]); 
                         ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                     }
+                    //caso contrario de que requeira mas tiempo se pone en estado listo para pdoer seguir en la sigueinte vuelta del RR
                     else{
                         AddProcessMemory(proc_enMem[auxContP]);
                         proc_enMem[auxContP].setEstado("Listo");
                         ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
-                        //DireccionesList.set
                     }
                     auxContP++;
                     for(int k = 0; k<cont_proc_enMem; k++){
                         if (auxContP>=cont_proc_enMem){
                             auxContP=0; 
                         }
+                        //Buscar procesos que tienen el estado listo para la vuela del RR y ejecutarlos
                         if ((proc_enMem[auxContP].getTP()<proc_enMem[auxContP].getTC())&&(proc_enMem[auxContP].getEstado().equals("Listo"))){
                             Activador(proc_enMem[auxContP].getName());
                             TextPlanificador.setText(proc_enMem[auxContP].getName());
@@ -363,9 +369,7 @@ public class Procesos extends javax.swing.JFrame{
                         else{
                             auxContP++;
                         }
-                       
                     }
-
                 }
                 try {
                     Thread.sleep(920);
@@ -377,8 +381,8 @@ public class Procesos extends javax.swing.JFrame{
         }  
     }
     public void ActualizarInicio(){
-        Calendar auxTime = TiempoActual;
         for (int i = 0; i<cont_proc_enMem; i++){
+            //dar un segundo para inicio de procesos por puesta de ciclo inicial
                 if (i==0){
                     try {
                         Thread.sleep(proc_enMem[0].getTL()*1000);
@@ -492,11 +496,11 @@ public class Procesos extends javax.swing.JFrame{
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(41, 41, 41)
+                        .addGap(35, 35, 35)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnMasP, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(btnMasP, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
                             .addComponent(btnMenosP, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(82, 82, 82)
@@ -734,7 +738,7 @@ public class Procesos extends javax.swing.JFrame{
     }//GEN-LAST:event_btnReiniciarActionPerformed
 
     private void btnMasPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMasPActionPerformed
-        // TODO add your handling code here:
+        // Agregar un proceso a la lista de procesos
         proc = Arrays.copyOf(proc, proc.length + 1);
         createProcess();
         if (proc.length > 1){
@@ -743,7 +747,7 @@ public class Procesos extends javax.swing.JFrame{
     }//GEN-LAST:event_btnMasPActionPerformed
 
     private void btnMenosPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMenosPActionPerformed
-        // TODO add your handling code here:
+        // Eliminar un proceso de la lsita de procesos
         DefaultTableModel modelo = (DefaultTableModel)DescripTable.getModel();
         modelo.removeRow(DescripTable.getRowCount()-1);
         proc = Arrays.copyOf(proc, proc.length - 1);
