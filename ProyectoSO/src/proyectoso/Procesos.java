@@ -6,6 +6,7 @@
 package proyectoso;
 
 import java.awt.Point;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.logging.Level;
@@ -64,10 +65,10 @@ public class Procesos extends javax.swing.JFrame{
     }
     //asignacion de procesos, TL y TC
     public void createProcess(){
-        char array[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
+        //char array[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
         //Crear procesos
-        for(int i = 0; i < 10; i++){
-            proc[i] = new Process(array[i]+"");
+        for(int i = 0; i < proc.length; i++){
+            proc[i] = new Process(Character.toString(i+65)+"");
         }
         //Modelo de Tabla
         DefaultTableModel modelDT = new DefaultTableModel();
@@ -75,7 +76,7 @@ public class Procesos extends javax.swing.JFrame{
         modelDT.addColumn("TL");
         modelDT.addColumn("TC");
         //Ciclo de llenado de tabla
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < proc.length; i++){
             String Name = proc[i].getName();
             int TL = proc[i].getTL();
             int TC = proc[i].getTC();
@@ -138,8 +139,8 @@ public class Procesos extends javax.swing.JFrame{
         DefaultListModel listmodel = new DefaultListModel();
         Process[] TLOrder = this.proc.clone();
         //Ordenamiento Burbuja para tiempos de llegada
-        for (int i = 0; i < 10 - 1; i++) {
-            for (int j = 0; j < 10 - i - 1; j++) {
+        for (int i = 0; i < proc.length - 1; i++) {
+            for (int j = 0; j < proc.length - i - 1; j++) {
                 if (TLOrder[j].getTL() > TLOrder[j + 1].getTL()) {
                     Process temp = TLOrder[j];
                     TLOrder[j] = TLOrder[j + 1];
@@ -149,7 +150,7 @@ public class Procesos extends javax.swing.JFrame{
         }
         String[] auxMem = Mem_array.clone();
         //Escritura en la lista de memoria
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < proc.length; i++) {
             //Variables booleanas solo para verificacion de condiciones
             boolean spacemem = true;
             boolean aux = true;
@@ -441,6 +442,8 @@ public class Procesos extends javax.swing.JFrame{
         DescripTable = new javax.swing.JTable();
         BtnInit = new javax.swing.JButton();
         btnReiniciar = new javax.swing.JButton();
+        btnMasP = new javax.swing.JButton();
+        btnMenosP = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         PMemoryList = new javax.swing.JList<>();
@@ -496,6 +499,20 @@ public class Procesos extends javax.swing.JFrame{
             }
         });
 
+        btnMasP.setText("+");
+        btnMasP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMasPActionPerformed(evt);
+            }
+        });
+
+        btnMenosP.setText("-");
+        btnMenosP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMenosPActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -504,23 +521,34 @@ public class Procesos extends javax.swing.JFrame{
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(41, 41, 41)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnMasP, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE)
+                            .addComponent(btnMenosP, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(82, 82, 82)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnReiniciar)
-                            .addComponent(BtnInit, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(44, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(BtnInit, javax.swing.GroupLayout.DEFAULT_SIZE, 94, Short.MAX_VALUE)
+                            .addComponent(btnReiniciar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(56, 56, 56)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(56, 56, 56)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(157, 157, 157)
+                        .addComponent(btnMasP)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnMenosP)))
                 .addGap(18, 18, 18)
                 .addComponent(BtnInit, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(btnReiniciar)
+                .addComponent(btnReiniciar, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -643,23 +671,26 @@ public class Procesos extends javax.swing.JFrame{
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(40, 40, 40)
-                        .addComponent(jLabel2)
-                        .addGap(226, 226, 226)
-                        .addComponent(jLabel1))
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                            .addComponent(jLabel7)
-                            .addGap(136, 136, 136))
-                        .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(29, 29, 29)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addContainerGap()
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGap(40, 40, 40)
+                                .addComponent(jLabel2)
+                                .addGap(226, 226, 226)
+                                .addComponent(jLabel1))
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(29, 29, 29)
+                                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(111, 111, 111)
+                        .addComponent(jLabel7)
+                        .addGap(136, 136, 136)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -679,7 +710,7 @@ public class Procesos extends javax.swing.JFrame{
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(3, 3, 3)
                         .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)))
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
@@ -726,6 +757,22 @@ public class Procesos extends javax.swing.JFrame{
         cont_proc_enMem = 0;
         clearElements();
     }//GEN-LAST:event_btnReiniciarActionPerformed
+
+    private void btnMasPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMasPActionPerformed
+        // TODO add your handling code here:
+        //DefaultTableModel modelo = (DefaultTableModel)DescripTable.getModel();
+        //modelo.removeRow(DescripTable.getRowCount()-1);
+        proc = Arrays.copyOf(proc, proc.length + 1);
+        createProcess();
+    }//GEN-LAST:event_btnMasPActionPerformed
+
+    private void btnMenosPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMenosPActionPerformed
+        // TODO add your handling code here:
+        DefaultTableModel modelo = (DefaultTableModel)DescripTable.getModel();
+        modelo.removeRow(DescripTable.getRowCount()-1);
+        proc = Arrays.copyOf(proc, proc.length - 1);
+        createProcess();
+    }//GEN-LAST:event_btnMenosPActionPerformed
 
     /**
      * @param args the command line arguments
@@ -809,6 +856,8 @@ public class Procesos extends javax.swing.JFrame{
     private javax.swing.JTextField TextH;
     private javax.swing.JTextField TextPc;
     private javax.swing.JTextField TextPlanificador;
+    private javax.swing.JButton btnMasP;
+    private javax.swing.JButton btnMenosP;
     private javax.swing.JButton btnReiniciar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
