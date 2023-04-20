@@ -1,11 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package proyectoso;
 
+//Librerias para uso del proyecto
 import java.awt.Point;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Random;
 import java.util.logging.Level;
@@ -15,15 +12,11 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
-/**
- *
- * @author JAz
- */
 public class Procesos extends javax.swing.JFrame{
     //Procesos de referencia en consola para verificar el funcionamiento del programa
     //variables generales
     private String[] Procesos = new String[15];
-    private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," "," ","SO","SO"}; // variable que se usa para representar la matriz
+    private String Mem_array[] = {" "," "," "," "," "," "," "," "," "," "," "," "," ","Activador","SO","SO"}; // variable que se usa para representar la matriz
     private String Direc_array[] = {"0xAFFh","0xA5Ah","0x9B5h","0x910h","0x86Bh","0x7C6h","0x721h","0x67Ch","0x5D7h","0x532h","0x48Dh","0x3E8h","0x343h","0x29Eh","0x1F9h","0x154h","0x000h"};
     // variable que se usa para direcciones de memoria por segundo
     private Process[] proc = new Process[10];
@@ -56,19 +49,14 @@ public class Procesos extends javax.swing.JFrame{
         //Limpiar lista al inicio de la ejecucion
         DefaultListModel listmodel = new DefaultListModel();
         PMemoryList.setModel(listmodel);
-        //DefaultListModel direcModel = new DefaultListModel();
-        //for(int i = 0; i < 16; i++){
-        //    direcModel.addElement(Direc_array[i]);
-        //}
-        //DireccionesList.setModel(direcModel);
         DireccionesList.setListData(Direc_array);
     }
     //asignacion de procesos, TL y TC
     public void createProcess(){
-        char array[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
         //Crear procesos
-        for(int i = 0; i < 10; i++){
-            proc[i] = new Process(array[i]+"");
+        for(int i = 0; i < proc.length; i++){
+            String name = (String)(((char)(i+65))+"");
+            proc[i] = new Process(name);
         }
         //Modelo de Tabla
         DefaultTableModel modelDT = new DefaultTableModel();
@@ -76,7 +64,7 @@ public class Procesos extends javax.swing.JFrame{
         modelDT.addColumn("TL");
         modelDT.addColumn("TC");
         //Ciclo de llenado de tabla
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < proc.length; i++){
             String Name = proc[i].getName();
             int TL = proc[i].getTL();
             int TC = proc[i].getTC();
@@ -95,12 +83,14 @@ public class Procesos extends javax.swing.JFrame{
         }
         return bandera;
     }
+    
+    
     public void processVerify(){
         DefaultTableModel modelDT2 = new DefaultTableModel();
         modelDT2=(DefaultTableModel) DescripTable.getModel();
         int TL=0;
         int TC=0;
-        for(int i=0;i<10;i++){
+        for(int i=0;i<proc.length;i++){
           
            TL=Integer.parseInt(modelDT2.getValueAt(i, 1).toString());
            TC=Integer.parseInt(modelDT2.getValueAt(i, 2).toString());
@@ -137,10 +127,10 @@ public class Procesos extends javax.swing.JFrame{
         processVerify();
         boolean bandera = false;
         DefaultListModel listmodel = new DefaultListModel();
-        Process[] TLOrder = this.proc;
+        Process[] TLOrder = this.proc.clone();
         //Ordenamiento Burbuja para tiempos de llegada
-        for (int i = 0; i < 10 - 1; i++) {
-            for (int j = 0; j < 10 - i - 1; j++) {
+        for (int i = 0; i < proc.length - 1; i++) {
+            for (int j = 0; j < proc.length - i - 1; j++) {
                 if (TLOrder[j].getTL() > TLOrder[j + 1].getTL()) {
                     Process temp = TLOrder[j];
                     TLOrder[j] = TLOrder[j + 1];
@@ -148,8 +138,9 @@ public class Procesos extends javax.swing.JFrame{
                 }
             }
         }
+        String[] auxMem = Mem_array.clone();
         //Escritura en la lista de memoria
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < proc.length; i++) {
             //Variables booleanas solo para verificacion de condiciones
             boolean spacemem = true;
             boolean aux = true;
@@ -157,7 +148,6 @@ public class Procesos extends javax.swing.JFrame{
             for(int k = 0; k < 10; k++){
                 //generar numero random para ponerlo en la memoria
                 int rnd = generateRand();
-               
                 if(rnd + TLOrder[i].getTC() - 1 < 14){
                     if(verifypos(rnd-1, TLOrder[i].getTC()) == false){
                         aux = false;
@@ -172,8 +162,6 @@ public class Procesos extends javax.swing.JFrame{
                     }  
                 }
                 if(k == 9) spacemem = false;
-               
-                
             }
             if(spacemem == false){
                     System.out.println("Memoria insuficiente para proceso "+ TLOrder[i].getName());
@@ -182,11 +170,7 @@ public class Procesos extends javax.swing.JFrame{
                 proc[i].setMem(true);
             }
         }
-        //insercion de los procesos a la lista de la memoria
-        for(int i = 0; i < 16; i++){
-            listmodel.addElement(Mem_array[i]);
-        }
-        PMemoryList.setModel(listmodel);
+        Mem_array = auxMem.clone();
         ListFill();
     }
     
@@ -202,35 +186,31 @@ public class Procesos extends javax.swing.JFrame{
     }
     public void DeleteProcessMemory(Process aux){
         DefaultListModel listmodel = new DefaultListModel();
-        
             for(int j = 0; j < aux.getTP(); j++){
-                
                 Mem_array[j + aux.getMemoryspace()] = " ";
             }
         for(int i = 0; i < 16; i++){
             listmodel.addElement(Mem_array[i]);
-            
         }
         PMemoryList.setModel(listmodel);
     }
-    
-    public String Insufficient_memory(){
-        String R = "Los procesos: ";
-        for(int i = 0; i < 10; i++){
-            if(proc[i].getMem() == false){
-                R = R + proc[i].getName() + " ";
-            }
+    public void AddProcessMemory(Process aux){
+        DefaultListModel listmodel = new DefaultListModel();
+        for(int j = 0; j < aux.getTC(); j++){
+            Mem_array[j + aux.getMemoryspace()] = aux.getName();
         }
-        R = R + "no pudieron ser agregados a la memoria por falta de espacio";
-        return R;
+        for(int i = 0; i < 16; i++){
+            listmodel.addElement(Mem_array[i]);
+        }
+        PMemoryList.setModel(listmodel);
     }
-
     
     public class RoundRobin extends Thread {
         private Calendar Tiempo;
         private int TP;
         private String Pactual;
         private int quantum;
+        private String preProceso = "-";
         
         public RoundRobin(Calendar Tiempo) {
             this.Tiempo = Tiempo;
@@ -252,6 +232,32 @@ public class Procesos extends javax.swing.JFrame{
             DireccionesList.setListData(aux);
         }
         
+        public void Activador(String proceso){
+            if (!preProceso.equals(proceso)){
+                preProceso = proceso;
+                TextPlanificador.setText("Activador");
+                String aux[] = Direc_array.clone();
+                TextH.setText(aux[aux.length-3]);
+                TextB.setText(aux[aux.length-4]);
+                //colocar etiquetas b y h en activador
+                aux[aux.length-3] = "h";
+                aux[aux.length-4] = "b";
+                DireccionesList.setListData(aux);
+                TextPc.setText(TextH.getText());
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                TextPc.setText(TextB.getText());
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+        
         @Override
         public void run(){
             int auxContP = 0;
@@ -260,6 +266,7 @@ public class Procesos extends javax.swing.JFrame{
             } catch (InterruptedException ex) {
                 Logger.getLogger(Procesos.class.getName()).log(Level.SEVERE, null, ex);
             }
+            AddProcessMemory(proc_enMem[auxContP]);
             TextPlanificador.setText(proc_enMem[auxContP].getName());
             proc_enMem[auxContP].setEstado("Ejecucion");
             int bpos=66+((proc_enMem[auxContP].getMemoryspace()+proc_enMem[auxContP].getTC())*20);
@@ -280,6 +287,7 @@ public class Procesos extends javax.swing.JFrame{
                             ProcList.setValueAt(proc_enMem[i].getInicio(), i, 2);
                             TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
                         }
+                        AddProcessMemory(proc_enMem[i]);
                         proc_enMem[i].setEstado("Listo");
                         ProcList.setValueAt(proc_enMem[i].getEstado(), i, 1);
                         TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
@@ -297,19 +305,20 @@ public class Procesos extends javax.swing.JFrame{
                         TextPc.setText(Direc_array[proc_enMem[i].getMemoryspace()]);
                     }
                 }
+                //al terminar los procesos terminados que estan dentro de la meoria se termina el ciclo
                 if (terminados>=cont_proc_enMem){
                     proc_enMem[auxContP].setFin(jLabel7.getText());
                     ProcList.setValueAt(proc_enMem[auxContP].getFin(), auxContP, 3);
                     proc_enMem[auxContP].setEstado("Terminado");
                     DeleteProcessMemory(proc_enMem[auxContP]);
                     ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
-                    System.out.println("Terminado");
                     DireccionesList.setListData(Direc_array);
                     break;
                 }
                 else{
                     terminados = 0;
                 }
+                //Si el tiempo procesado es menor a 3 se pone en ejecucion y se actualizan procesos
                 if ((quantum<3)&&(proc_enMem[auxContP].getTP()<proc_enMem[auxContP].getTC())){
                     TextPlanificador.setText(proc_enMem[auxContP].getName());
                     proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
@@ -321,6 +330,8 @@ public class Procesos extends javax.swing.JFrame{
                     quantum++;
                 }
                 else{
+                    //Si el tiempo procesado es igual al quantum
+                    //Si el proceso ya no requiere mas tiempo el estado se marca como terminado
                     if (proc_enMem[auxContP].getTP()>=proc_enMem[auxContP].getTC()){
                         proc_enMem[auxContP].setFin(jLabel7.getText());
                         ProcList.setValueAt(proc_enMem[auxContP].getFin(), auxContP, 3);
@@ -328,17 +339,20 @@ public class Procesos extends javax.swing.JFrame{
                         DeleteProcessMemory(proc_enMem[auxContP]); 
                         ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
                     }
+                    //caso contrario de que requeira mas tiempo se pone en estado listo para pdoer seguir en la sigueinte vuelta del RR
                     else{
+                        AddProcessMemory(proc_enMem[auxContP]);
                         proc_enMem[auxContP].setEstado("Listo");
                         ProcList.setValueAt(proc_enMem[auxContP].getEstado(), auxContP, 1);
-                        //DireccionesList.set
                     }
                     auxContP++;
                     for(int k = 0; k<cont_proc_enMem; k++){
                         if (auxContP>=cont_proc_enMem){
                             auxContP=0; 
                         }
+                        //Buscar procesos que tienen el estado listo para la vuela del RR y ejecutarlos
                         if ((proc_enMem[auxContP].getTP()<proc_enMem[auxContP].getTC())&&(proc_enMem[auxContP].getEstado().equals("Listo"))){
+                            Activador(proc_enMem[auxContP].getName());
                             TextPlanificador.setText(proc_enMem[auxContP].getName());
                             proc_enMem[auxContP].setTP(proc_enMem[auxContP].getTP()+1);
                             proc_enMem[auxContP].setEstado("Ejecucion");
@@ -355,9 +369,7 @@ public class Procesos extends javax.swing.JFrame{
                         else{
                             auxContP++;
                         }
-                       
                     }
-
                 }
                 try {
                     Thread.sleep(920);
@@ -369,8 +381,8 @@ public class Procesos extends javax.swing.JFrame{
         }  
     }
     public void ActualizarInicio(){
-        Calendar auxTime = TiempoActual;
         for (int i = 0; i<cont_proc_enMem; i++){
+            //dar un segundo para inicio de procesos por puesta de ciclo inicial
                 if (i==0){
                     try {
                         Thread.sleep(proc_enMem[0].getTL()*1000);
@@ -391,9 +403,6 @@ public class Procesos extends javax.swing.JFrame{
                 }
             }
     }
-    
-    
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -408,6 +417,9 @@ public class Procesos extends javax.swing.JFrame{
         jScrollPane1 = new javax.swing.JScrollPane();
         DescripTable = new javax.swing.JTable();
         BtnInit = new javax.swing.JButton();
+        btnReiniciar = new javax.swing.JButton();
+        btnMasP = new javax.swing.JButton();
+        btnMenosP = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         PMemoryList = new javax.swing.JList<>();
@@ -456,6 +468,27 @@ public class Procesos extends javax.swing.JFrame{
             }
         });
 
+        btnReiniciar.setText("Reiniciar");
+        btnReiniciar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReiniciarActionPerformed(evt);
+            }
+        });
+
+        btnMasP.setText("+");
+        btnMasP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMasPActionPerformed(evt);
+            }
+        });
+
+        btnMenosP.setText("-");
+        btnMenosP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMenosPActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -463,20 +496,35 @@ public class Procesos extends javax.swing.JFrame{
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(41, 41, 41)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(35, 35, 35)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 176, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnMasP, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
+                            .addComponent(btnMenosP, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(82, 82, 82)
-                        .addComponent(BtnInit, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(44, Short.MAX_VALUE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(BtnInit, javax.swing.GroupLayout.DEFAULT_SIZE, 94, Short.MAX_VALUE)
+                            .addComponent(btnReiniciar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(56, 56, 56)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(56, 56, 56)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 305, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(157, 157, 157)
+                        .addComponent(btnMasP)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnMenosP)))
                 .addGap(18, 18, 18)
                 .addComponent(BtnInit, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnReiniciar, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -530,7 +578,7 @@ public class Procesos extends javax.swing.JFrame{
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(16, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(TextPlanificador, javax.swing.GroupLayout.PREFERRED_SIZE, 131, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -553,7 +601,9 @@ public class Procesos extends javax.swing.JFrame{
                                     .addComponent(TextH, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(TextB, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addGap(135, 135, 135))
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 368, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 368, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -575,7 +625,7 @@ public class Procesos extends javax.swing.JFrame{
                     .addComponent(TextH, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel13))
                 .addGap(18, 18, 18)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 157, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -599,47 +649,51 @@ public class Procesos extends javax.swing.JFrame{
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(55, 55, 55)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(40, 40, 40)
                         .addComponent(jLabel2)
                         .addGap(226, 226, 226)
-                        .addComponent(jLabel1))
-                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                            .addComponent(jLabel7)
-                            .addGap(136, 136, 136))
-                        .addComponent(jLabel6, javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(29, 29, 29)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jLabel1)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 59, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 146, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(32, 32, 32)
+                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel6)
+                        .addGap(138, 138, 138))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addGap(152, 152, 152))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(38, 38, 38)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(38, 38, 38)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane2)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(12, 12, 12))
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(3, 3, 3)
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 401, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
-                .addGap(17, 17, 17))
+                .addGap(23, 23, 23))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -650,7 +704,7 @@ public class Procesos extends javax.swing.JFrame{
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -663,14 +717,45 @@ public class Procesos extends javax.swing.JFrame{
 
     private void BtnInitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnInitActionPerformed
         // TODO add your handling code here:
+        btnReiniciar.setEnabled(true);
+        BtnInit.setEnabled(false);
         TiempoActual = Calendar.getInstance();
         memory_fill();
         rr = new RoundRobin(TiempoActual);
         rr.start();
-        String strprocesos = Insufficient_memory()+"";
-        JOptionPane.showMessageDialog(null, strprocesos);
-        
     }//GEN-LAST:event_BtnInitActionPerformed
+
+    private void btnReiniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReiniciarActionPerformed
+        btnReiniciar.setEnabled(false);
+        BtnInit.setEnabled(true);
+        Procesos = new String[15];
+        String aux[] = {" "," "," "," "," "," "," "," "," "," "," "," "," ","Activador","SO","SO"};
+        Mem_array = aux.clone();
+        proc = new Process[10];
+        proc_enMem = new Process[10];
+        cont_proc_enMem = 0;
+        clearElements();
+    }//GEN-LAST:event_btnReiniciarActionPerformed
+
+    private void btnMasPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMasPActionPerformed
+        // Agregar un proceso a la lista de procesos
+        proc = Arrays.copyOf(proc, proc.length + 1);
+        createProcess();
+        if (proc.length > 1){
+            btnMenosP.setEnabled(true);
+        }
+    }//GEN-LAST:event_btnMasPActionPerformed
+
+    private void btnMenosPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMenosPActionPerformed
+        // Eliminar un proceso de la lsita de procesos
+        DefaultTableModel modelo = (DefaultTableModel)DescripTable.getModel();
+        modelo.removeRow(DescripTable.getRowCount()-1);
+        proc = Arrays.copyOf(proc, proc.length - 1);
+        createProcess();
+        if (proc.length <= 1){
+            btnMenosP.setEnabled(false);
+        }
+    }//GEN-LAST:event_btnMenosPActionPerformed
 
     /**
      * @param args the command line arguments
@@ -728,9 +813,6 @@ public class Procesos extends javax.swing.JFrame{
     
     public class Reloj extends Thread {
         Calendar calendario;
-       
-        
-        
         @Override
         public void run() {
             while (true) {
@@ -754,6 +836,9 @@ public class Procesos extends javax.swing.JFrame{
     private javax.swing.JTextField TextH;
     private javax.swing.JTextField TextPc;
     private javax.swing.JTextField TextPlanificador;
+    private javax.swing.JButton btnMasP;
+    private javax.swing.JButton btnMenosP;
+    private javax.swing.JButton btnReiniciar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;

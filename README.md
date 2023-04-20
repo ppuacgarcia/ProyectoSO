@@ -23,10 +23,16 @@ _Por lo que utilizamos una clase *process* la cuál guarda todos los atributos d
 
 _También generamos la clase *RoundRobin* la cual se enfoca en poder planificar el tiempo que el procesador trabajará con cada proceso, utilizando el Quantum previsto, dando un tiempo de consumo determinado para cada proceso, dejándolos en la memoria únicamente si aún no han sido procesados en su totalidad_
 
+_Se agrego un activador de un segundo para mostrar el cambio entre procesos dentro del RR_
+
 _La clase reloj busca mantenerse por medio de un hilo, actualizando y obteniendo la hora actual del sistema_
 
 _Por último tenemos la clase Main que es un form en el cual se encuentra la parte gráfica de todo el proceso, se utiliza para poder generar los procesos en un inicio, aunque su función principal es poder demostrar la simulación de forma gráfica y compresible_
 
+Se implementaron algunos botones de ***+ y -*** al igual que ***reiniciar*** para poder agregar y quitar procesos dentro de la lsita
++ **"+"** Agrega procesos a la lista de procesos, se genera con tiempo de llegada y tiempo de consumo aleatorio
++ **"-"** Quita procesos a la lista de procesos
++ **"Reiniciar"** vuelve el programa a tiempo 0, para poder ingresar nuevos procesos y tiempos
 
 
 ## Construido con 🛠️
@@ -35,10 +41,10 @@ _Por último tenemos la clase Main que es un form en el cual se encuentra la par
 
 ## Autores ✒️
 
-**Pablo Puac** 
-**Carlos Cancinos** 
-**Jose Az** 
-**Jesús Queme** 
++ **Pablo Puac** 
++ **Carlos Cancinos** 
++ **Jose Az** 
++ **Jesús Queme** ?
 
 También puedes mirar la lista de todos los [contribuyentes](https://github.com/ppuacgarcia/ProyectoSO/graphs/contributors) quienes han participado en este proyecto. 
 
