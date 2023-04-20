@@ -30,9 +30,9 @@ _La clase reloj busca mantenerse por medio de un hilo, actualizando y obteniendo
 _Por último tenemos la clase Main que es un form en el cual se encuentra la parte gráfica de todo el proceso, se utiliza para poder generar los procesos en un inicio, aunque su función principal es poder demostrar la simulación de forma gráfica y compresible_
 
 Se implementaron algunos botones de ***+ y -*** al igual que ***reiniciar*** para poder agregar y quitar procesos dentro de la lsita
-+ **+** Agrega procesos a la lista de procesos, se genera con tiempo de llegada y tiempo de consumo aleatorio
-+ **-** Quita procesos a la lista de procesos
-+ **Reiniciar** vuelve el programa a tiempo 0, para poder ingresar nuevos procesos y tiempos
++ **"+"** Agrega procesos a la lista de procesos, se genera con tiempo de llegada y tiempo de consumo aleatorio
++ **"-"** Quita procesos a la lista de procesos
++ **"Reiniciar"** vuelve el programa a tiempo 0, para poder ingresar nuevos procesos y tiempos
 
 
 ## Construido con 🛠️
