@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -193,7 +194,6 @@ public class Procesos extends javax.swing.JFrame{
         }
         PMemoryList.setModel(listmodel);
     }
-    
     public void AddProcessMemory(Process aux){
         DefaultListModel listmodel = new DefaultListModel();
         for(int j = 0; j < aux.getTC(); j++){
@@ -783,6 +783,7 @@ public class Procesos extends javax.swing.JFrame{
             java.util.logging.Logger.getLogger(Procesos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -825,7 +826,6 @@ public class Procesos extends javax.swing.JFrame{
             }
         }
     }
-    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BtnInit;
     private javax.swing.JTable DescripTable;

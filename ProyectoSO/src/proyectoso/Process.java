@@ -1,17 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package proyectoso;
 
 import java.util.Calendar;
 import java.util.Random;
-
-/**
- *
- * @author USUARIO
- */
 public class Process {
     private String name;
     private int TL;
