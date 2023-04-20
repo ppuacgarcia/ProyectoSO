@@ -764,6 +764,9 @@ public class Procesos extends javax.swing.JFrame{
         //modelo.removeRow(DescripTable.getRowCount()-1);
         proc = Arrays.copyOf(proc, proc.length + 1);
         createProcess();
+        if (proc.length > 1){
+            btnMenosP.setEnabled(true);
+        }
     }//GEN-LAST:event_btnMasPActionPerformed
 
     private void btnMenosPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMenosPActionPerformed
@@ -772,6 +775,9 @@ public class Procesos extends javax.swing.JFrame{
         modelo.removeRow(DescripTable.getRowCount()-1);
         proc = Arrays.copyOf(proc, proc.length - 1);
         createProcess();
+        if (proc.length <= 1){
+            btnMenosP.setEnabled(false);
+        }
     }//GEN-LAST:event_btnMenosPActionPerformed
 
     /**
